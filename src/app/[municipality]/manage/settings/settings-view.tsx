@@ -303,7 +303,7 @@ function ItemDialog({ kind, municipalityId, item, members, onClose }: { kind: "c
               <>
                 <label className="flex items-center justify-between text-sm">
                   {t("initial")}
-                  <Switch checked={initial} onCheckedChange={setInitial} />
+                  <Switch checked={initial} onCheckedChange={setInitial} disabled={Boolean(item && "is_initial" in item && item.is_initial)} />
                 </label>
                 <label className="flex items-center justify-between text-sm">
                   {t("closed")}

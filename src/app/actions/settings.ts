@@ -122,10 +122,17 @@ export async function saveStatus(municipalityId: string, input: z.input<typeof s
   const ctx = await adminClient(municipalityId);
   if (!ctx) return { ok: false };
   const { id, ...values } = parsed.data;
-  // Exactly one initial status per municipality.
+  // Exactly one initial status per municipality: it can only be moved, never cleared.
+  if (id && !values.is_initial) {
+    const { data: current } = await ctx.supabase.from("statuses").select("is_initial").eq("id", id).single();
+    if (current?.is_initial) values.is_initial = true;
+  }
   if (values.is_initial) {
     values.is_active = true;
-    await ctx.supabase.from("statuses").update({ is_initial: false }).eq("municipality_id", municipalityId).neq("id", id ?? "");
+    let reset = ctx.supabase.from("statuses").update({ is_initial: false }).eq("municipality_id", municipalityId).eq("is_initial", true);
+    if (id) reset = reset.neq("id", id);
+    const { error } = await reset;
+    if (error) return { ok: false };
   }
   if (id) {
     const { error } = await ctx.supabase.from("statuses").update(values).eq("id", id).eq("municipality_id", municipalityId);
@@ -170,6 +177,10 @@ export async function moveItem(
 export async function deleteItem(municipalityId: string, table: "categories" | "statuses", id: string): Promise<Result> {
   const ctx = await adminClient(municipalityId);
   if (!ctx) return { ok: false };
+  if (table === "statuses") {
+    const { data: status } = await ctx.supabase.from("statuses").select("is_initial").eq("id", id).single();
+    if (status?.is_initial) return { ok: false, error: "inUse" };
+  }
   const column = table === "categories" ? "category_id" : "status_id";
   const { count } = await ctx.supabase.from("reports").select("id", { count: "exact", head: true }).eq(column, id);
   if (count) return { ok: false, error: "inUse" };
