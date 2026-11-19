@@ -188,7 +188,7 @@ begin
     (new.id, '{"en": "Street lighting failure", "sl": "Okvare javne razsvetljave"}', 'lightbulb', '#ca8a04', 30),
     (new.id, '{"en": "Damaged street furniture", "sl": "Poškodbe urbane opreme"}', 'armchair', '#7c3aed', 40),
     (new.id, '{"en": "Littering and illegal dumping", "sl": "Nasmeteno območje (divja odlagališča, ekološki otoki)"}', 'trash-2', '#15803d', 50),
-    (new.id, '{"en": "Ideas and suggestions", "sl": "Predlogi in pobude"}', 'lightbulb', '#2563eb', 60);
+    (new.id, '{"en": "Ideas and suggestions", "sl": "Predlogi in pobude"}', 'message-square-plus', '#2563eb', 60);
 
   insert into public.statuses (municipality_id, name, color, sort_order, is_initial, is_closed) values
     (new.id, '{"en": "New", "sl": "Nova"}', '#2563eb', 10, true, false),

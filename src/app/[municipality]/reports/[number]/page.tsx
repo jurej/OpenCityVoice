@@ -1,0 +1,195 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { ArrowLeft, MapPin } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { ReportMap } from "@/components/map/report-map";
+import { CategoryLabel, StatusBadge, TimeAgo } from "@/components/report-bits";
+import { PhotoGallery } from "@/components/photo-gallery";
+import { getAccess, getCategories, getCurrentUser, getMunicipality, getStatuses } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
+import { localized } from "@/i18n/config";
+import { VoteButton } from "./vote-button";
+import { Comments } from "./comments";
+import { ShareButton } from "./share-button";
+
+type Params = PageProps<"/[municipality]/reports/[number]">;
+
+async function loadReport(slug: string, numberParam: string) {
+  const number = Number(numberParam);
+  if (!Number.isInteger(number) || number < 1) notFound();
+  const municipality = await getMunicipality(slug);
+  const supabase = await createClient();
+  const { data: report } = await supabase
+    .from("reports")
+    .select("*, author:profiles!reports_author_id_fkey(full_name)")
+    .eq("municipality_id", municipality.id)
+    .eq("number", number)
+    .maybeSingle();
+  if (!report) notFound();
+  return { municipality, report, supabase };
+}
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { municipality: slug, number } = await params;
+  const { report, municipality } = await loadReport(slug, number);
+  return {
+    title: `${report.title || report.description.slice(0, 60)} · ${municipality.name}`,
+    description: report.description.slice(0, 160),
+  };
+}
+
+export default async function ReportPage({ params }: Params) {
+  const { municipality: slug, number } = await params;
+  const { municipality, report, supabase } = await loadReport(slug, number);
+  const t = await getTranslations("report");
+  const locale = await getLocale();
+  const user = await getCurrentUser();
+
+  const [categories, statuses, access, { data: events }, { data: comments }, { data: vote }] = await Promise.all([
+    getCategories(municipality.id),
+    getStatuses(municipality.id),
+    getAccess(municipality.id),
+    supabase
+      .from("report_events")
+      .select("id, type, note, created_at, to_status_id, assignee_id")
+      .eq("report_id", report.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("report_comments")
+      .select("id, body, is_official, created_at, author_id, author:profiles(full_name, avatar_url)")
+      .eq("report_id", report.id)
+      .order("created_at"),
+    user
+      ? supabase.from("report_votes").select("report_id").eq("report_id", report.id).eq("user_id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  const category = categories.find((c) => c.id === report.category_id)!;
+  const status = statuses.find((s) => s.id === report.status_id)!;
+  const statusById = new Map(statuses.map((s) => [s.id, s]));
+  const path = `/${slug}/reports/${report.number}`;
+  const publicEvents = (events ?? []).filter((e) => e.type === "created" || e.type === "status_changed");
+
+  return (
+    <div style={{ "--primary": municipality.primary_color } as React.CSSProperties}>
+      <SiteHeader municipality={municipality} isStaff={access.isStaff} next={path} />
+      <main className="mx-auto max-w-5xl px-4 pt-4 pb-16 sm:pt-6">
+        <Link
+          href={`/${slug}?report=${report.id}`}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          {municipality.name}
+        </Link>
+
+        <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_340px]">
+          <article className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge name={status.name} color={status.color} />
+              <span className="text-xs text-muted-foreground">{t("number", { number: report.number })}</span>
+            </div>
+            <h1 className="mt-3 text-2xl font-semibold text-balance sm:text-3xl">
+              {report.title || localized(category.name, locale)}
+            </h1>
+            <CategoryLabel name={category.name} icon={category.icon} color={category.color} className="mt-3 text-sm" />
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t("reportedBy", { name: report.author?.full_name || t("anonymous") })} · <TimeAgo date={report.created_at} />
+            </p>
+
+            {report.photos.length > 0 && <PhotoGallery paths={report.photos} className="mt-6" />}
+
+            <p className="mt-6 leading-relaxed whitespace-pre-line">{report.description}</p>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              <VoteButton
+                reportId={report.id}
+                count={report.vote_count}
+                voted={Boolean(vote)}
+                signedIn={Boolean(user)}
+                path={path}
+              />
+              <ShareButton />
+            </div>
+
+            <Comments
+              reportId={report.id}
+              path={path}
+              currentUserId={user?.id ?? null}
+              canModerate={access.isStaff}
+              comments={(comments ?? []).map((c) => ({
+                id: c.id,
+                body: c.body,
+                isOfficial: c.is_official,
+                createdAt: c.created_at,
+                authorId: c.author_id,
+                authorName: c.author?.full_name ?? null,
+                authorAvatar: c.author?.avatar_url ?? null,
+              }))}
+            />
+          </article>
+
+          <aside className="space-y-6">
+            <section className="overflow-hidden rounded-xl border">
+              <ReportMap
+                className="h-48 w-full"
+                center={[report.lat, report.lng]}
+                zoom={16}
+                interactive={false}
+                pins={[{ id: report.id, lat: report.lat, lng: report.lng, color: category.color }]}
+              />
+              <div className="flex items-start gap-2 p-3 text-sm">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-muted-foreground">
+                    {report.address || `${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`}
+                  </p>
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${report.lat}&mlon=${report.lng}#map=18/${report.lat}/${report.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block font-medium underline-offset-4 hover:underline"
+                  >
+                    {t("openInMaps")}
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-sm font-semibold">{t("timeline")}</h2>
+              <ol className="mt-3 space-y-0">
+                {publicEvents.map((event, i) => {
+                  const to = event.to_status_id ? statusById.get(event.to_status_id) : null;
+                  return (
+                    <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
+                      {i < publicEvents.length - 1 && (
+                        <span className="absolute top-3 bottom-0 left-[5px] w-px bg-border" aria-hidden="true" />
+                      )}
+                      <span
+                        className="relative mt-1.5 size-[11px] shrink-0 rounded-full border-2 border-background ring-1 ring-border"
+                        style={{ backgroundColor: to?.color ?? "#a8a29e" }}
+                      />
+                      <div className="min-w-0 text-sm">
+                        <p className="font-medium">
+                          {event.type === "created"
+                            ? t("events.created")
+                            : t("events.status_changed", { status: to ? localized(to.name, locale) : "" })}
+                        </p>
+                        <TimeAgo date={event.created_at} className="text-xs text-muted-foreground" />
+                        {event.note && (
+                          <p className="mt-1.5 rounded-md bg-muted px-3 py-2 text-sm whitespace-pre-line">{event.note}</p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}

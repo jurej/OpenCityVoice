@@ -62,7 +62,8 @@ export function UserMenu({ user, next = "/" }: Props) {
     return (
       <div className="flex items-center gap-1">
         <LanguageSwitcher />
-        <Button variant="outline" size="sm" render={<Link href={`/login?next=${encodeURIComponent(next)}`} />}>
+        <Button variant="outline" size="sm" render={<Link href={`/login?next=${encodeURIComponent(next)}`} />}
+          nativeButton={false}>
           {t("signIn")}
         </Button>
       </div>
