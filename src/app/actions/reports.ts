@@ -51,3 +51,61 @@ export async function deleteComment(commentId: string, path: string) {
   revalidatePath(path);
   return { ok: true as const };
 }
+
+const createReportSchema = z.object({
+  municipalityId: z.uuid(),
+  categoryId: z.uuid(),
+  title: z.string().trim().max(120).optional(),
+  description: z.string().trim().min(3).max(4000),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  address: z.string().trim().max(300).optional(),
+  photos: z.array(z.string().max(300)).max(4),
+});
+
+export type CreateReportResult =
+  | { ok: true; number: number }
+  | { ok: false; error: "invalid" | "outside" | "failed" };
+
+export async function createReport(input: z.input<typeof createReportSchema>): Promise<CreateReportResult> {
+  const parsed = createReportSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "invalid" };
+  const { supabase, userId } = await requireClaims();
+  const data = parsed.data;
+
+  // Photos must live in the author's own storage folder.
+  if (data.photos.some((p) => !p.startsWith(`${userId}/`))) return { ok: false, error: "invalid" };
+
+  const { data: inside } = await supabase.rpc("point_in_municipality", {
+    p_municipality_id: data.municipalityId,
+    p_lat: data.lat,
+    p_lng: data.lng,
+  });
+  if (inside === false) return { ok: false, error: "outside" };
+
+  const { data: report, error } = await supabase
+    .from("reports")
+    .insert({
+      municipality_id: data.municipalityId,
+      category_id: data.categoryId,
+      author_id: userId,
+      title: data.title || null,
+      description: data.description,
+      lat: data.lat,
+      lng: data.lng,
+      address: data.address || null,
+      photos: data.photos,
+      // Assigned by the prepare_new_report trigger.
+      number: 0,
+      status_id: "00000000-0000-0000-0000-000000000000",
+    })
+    .select("number")
+    .single();
+  if (error || !report) {
+    console.error("[createReport]", error);
+    return { ok: false, error: "failed" };
+  }
+
+  revalidatePath(`/`, "layout");
+  return { ok: true, number: report.number };
+}

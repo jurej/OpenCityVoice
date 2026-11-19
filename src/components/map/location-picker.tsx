@@ -67,7 +67,9 @@ export function LocationPicker({ value, zoom = 17, boundary, onChange, className
 
   return (
     <div className={`relative ${className ?? ""}`}>
-      <div ref={container} className="absolute inset-0" />
+      <div className="absolute inset-0">
+        <div ref={container} className="size-full" />
+      </div>
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
         <svg width="36" height="46" viewBox="0 0 36 46" aria-hidden="true" className="drop-shadow-md">
           <path
