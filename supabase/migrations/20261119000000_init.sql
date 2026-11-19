@@ -553,7 +553,7 @@ as $$
     'forward', jsonb_build_object('message', f.message, 'created_at', f.created_at, 'expires_at', f.expires_at),
     'report', to_jsonb(r) - 'location',
     'municipality', jsonb_build_object('name', m.name, 'slug', m.slug, 'primary_color', m.primary_color),
-    'category', c.name,
+    'category', jsonb_build_object('name', c.name, 'color', c.color),
     'status', jsonb_build_object('name', s.name, 'color', s.color)
   )
     from public.report_forwards f

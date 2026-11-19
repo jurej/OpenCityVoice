@@ -55,7 +55,7 @@ export function Comments({ reportId, path, currentUserId, canModerate, comments 
   }
 
   return (
-    <section className="mt-10 border-t pt-8">
+    <section id="comments" className="mt-10 scroll-mt-20 border-t pt-8">
       <h2 className="font-semibold">
         {t("comments")} <span className="font-normal text-muted-foreground">{comments.length}</span>
       </h2>
