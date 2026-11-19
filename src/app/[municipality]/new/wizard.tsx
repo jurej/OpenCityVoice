@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ShareButtons } from "../reports/[number]/share-button";
 import { useLocale, useTranslations } from "next-intl";
 import imageCompression from "browser-image-compression";
 import { ArrowLeft, Camera, Check, CircleCheck, ImagePlus, Loader2, LocateFixed, MapPin, ThumbsUp, TriangleAlert, X } from "lucide-react";
@@ -47,6 +48,7 @@ async function readGps(file: File): Promise<[number, number] | null> {
 export function NewReportWizard({ userId, municipality, categories, boundary }: Props) {
   const t = useTranslations("newReport");
   const tc = useTranslations("common");
+  const tr = useTranslations("report");
   const locale = useLocale();
   const router = useRouter();
   const [supabase] = useState(() => createClient());
@@ -217,6 +219,15 @@ export function NewReportWizard({ userId, municipality, categories, boundary }: 
         </div>
         <h1 className="mt-6 text-2xl font-semibold">{t("successTitle")}</h1>
         <p className="mt-2 max-w-sm text-muted-foreground">{t("successText", { number: createdNumber })}</p>
+        <div className="mt-8 w-full max-w-sm rounded-xl border bg-muted/30 p-4 text-left">
+          <h2 className="text-sm font-semibold">{tr("shareTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{tr("shareText")}</p>
+          <ShareButtons
+            className="mt-3"
+            url={`${window.location.origin}/${municipality.slug}/reports/${createdNumber}`}
+            text={tr("shareMessage", { title: title || description.slice(0, 80), municipality: municipality.name })}
+          />
+        </div>
         <div className="mt-8 flex w-full max-w-xs flex-col gap-2">
           <Button className="h-11" render={<Link href={`/${municipality.slug}/reports/${createdNumber}`} />} nativeButton={false}>
             {t("viewReport")}

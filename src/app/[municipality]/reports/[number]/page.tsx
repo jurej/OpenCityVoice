@@ -10,9 +10,10 @@ import { PhotoGallery } from "@/components/photo-gallery";
 import { getAccess, getCategories, getCurrentUser, getMunicipality, getStatuses } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { localized } from "@/i18n/config";
+import { photoUrl, siteUrl } from "@/lib/config";
 import { VoteButton } from "./vote-button";
 import { Comments } from "./comments";
-import { ShareButton } from "./share-button";
+import { ShareButtons } from "./share-button";
 
 type Params = PageProps<"/[municipality]/reports/[number]">;
 
@@ -34,9 +35,15 @@ async function loadReport(slug: string, numberParam: string) {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { municipality: slug, number } = await params;
   const { report, municipality } = await loadReport(slug, number);
+  const title = `${report.title || report.description.slice(0, 60)} · ${municipality.name}`;
+  const description = report.description.slice(0, 160);
+  const images = report.photos.slice(0, 1).map((path: string) => photoUrl(path));
   return {
-    title: `${report.title || report.description.slice(0, 60)} · ${municipality.name}`,
-    description: report.description.slice(0, 160),
+    title,
+    description,
+    alternates: { canonical: `/${slug}/reports/${report.number}` },
+    openGraph: { type: "article", title, description, images, siteName: "TownPing" },
+    twitter: { card: images.length ? "summary_large_image" : "summary", title, description, images },
   };
 }
 
@@ -110,8 +117,17 @@ export default async function ReportPage({ params }: Params) {
                 signedIn={Boolean(user)}
                 path={path}
               />
-              <ShareButton />
             </div>
+
+            <section className="mt-6 rounded-xl border bg-muted/30 p-4">
+              <h2 className="text-sm font-semibold">{t("shareTitle")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("shareText")}</p>
+              <ShareButtons
+                className="mt-3"
+                url={`${siteUrl}${path}`}
+                text={t("shareMessage", { title: report.title || report.description.slice(0, 80), municipality: municipality.name })}
+              />
+            </section>
 
             <Comments
               reportId={report.id}
