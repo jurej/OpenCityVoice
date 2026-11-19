@@ -1,7 +1,7 @@
 -- Database tests (pgTAP). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(15);
+select plan(17);
 
 -- Seed ids
 \set lj '\'10000000-0000-4000-8000-000000000001\''
@@ -94,6 +94,15 @@ select ok(
   not exists (select 1 from public.nearby_reports(:lj, 46.0512, 14.5052, 50, (select category_id from ctx))
     where description = 'Broken bench in the park'),
   'nearby_reports skips closed reports');
+
+-- Staff cannot rewrite citizen content or use another municipality's statuses
+select throws_ok(
+  $$update public.reports set description = 'Rewritten by staff' where description = 'Broken bench in the park'$$,
+  'P0001', 'Not allowed to change these report fields', 'staff cannot change report content');
+select throws_ok(
+  format('update public.reports set status_id = %L where description = %L',
+    (select id from public.statuses where municipality_id <> :lj limit 1), 'Broken bench in the park'),
+  'P0001', 'Invalid status', 'staff cannot use statuses of another municipality');
 
 select * from finish();
 rollback;

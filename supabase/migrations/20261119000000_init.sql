@@ -263,8 +263,11 @@ begin
     raise exception 'Invalid category';
   end if;
 
-  select default_assignee_id into new.assignee_id
-    from public.categories where id = new.category_id;
+  select c.default_assignee_id into new.assignee_id
+    from public.categories c
+    join public.municipality_members mm
+      on mm.user_id = c.default_assignee_id and mm.municipality_id = c.municipality_id and mm.status = 'approved'
+   where c.id = new.category_id;
 
   new.vote_count := 0;
   new.comment_count := 0;
@@ -344,11 +347,11 @@ declare
 begin
   if tg_table_name = 'report_votes' then
     update public.reports
-       set vote_count = (select count(*) from public.report_votes where report_id = rid)
+       set vote_count = greatest(vote_count + case when tg_op = 'INSERT' then 1 else -1 end, 0)
      where id = rid;
   else
     update public.reports
-       set comment_count = (select count(*) from public.report_comments where report_id = rid)
+       set comment_count = greatest(comment_count + case when tg_op = 'INSERT' then 1 else -1 end, 0)
      where id = rid;
   end if;
   return null;
@@ -431,8 +434,8 @@ security definer
 set search_path = ''
 as $$
 begin
-  insert into public.report_events (report_id, actor_id, type, note)
-  values (new.report_id, new.sent_by, 'forwarded', new.recipient_email);
+  insert into public.report_events (report_id, actor_id, type)
+  values (new.report_id, new.sent_by, 'forwarded');
   return new;
 end;
 $$;
@@ -667,8 +670,24 @@ begin
     or new.author_id is distinct from old.author_id
     or new.vote_count is distinct from old.vote_count and pg_trigger_depth() = 1
     or new.comment_count is distinct from old.comment_count and pg_trigger_depth() = 1
+    or new.title is distinct from old.title
+    or new.description is distinct from old.description
+    or new.photos is distinct from old.photos
+    or new.lat is distinct from old.lat
+    or new.lng is distinct from old.lng
+    or new.address is distinct from old.address
   ) then
     raise exception 'Not allowed to change these report fields';
+  end if;
+  if new.status_id is distinct from old.status_id and not exists (
+    select 1 from public.statuses where id = new.status_id and municipality_id = new.municipality_id
+  ) then
+    raise exception 'Invalid status';
+  end if;
+  if new.category_id is distinct from old.category_id and not exists (
+    select 1 from public.categories where id = new.category_id and municipality_id = new.municipality_id
+  ) then
+    raise exception 'Invalid category';
   end if;
   return new;
 end;
