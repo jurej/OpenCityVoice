@@ -21,8 +21,15 @@ export default async function ManagePage({ params, searchParams }: PageProps<"/[
     getAccess(municipality.id),
   ]);
   const supabase = await createClient();
-  const { data: recent } = await supabase.rpc("recent_vote_counts", { p_municipality_id: municipality.id, p_days: 7 });
-  const recentVotes = Object.fromEntries((recent ?? []).map((r) => [r.report_id, Number(r.votes)]));
+  const recentVotes: Record<string, number> = {};
+  // Page through the API row cap; rows come sorted by vote count.
+  for (let from = 0; ; from += 1000) {
+    const { data } = await supabase
+      .rpc("recent_vote_counts", { p_municipality_id: municipality.id, p_days: 7 })
+      .range(from, from + 999);
+    for (const row of data ?? []) recentVotes[row.report_id] = Number(row.votes);
+    if (!data || data.length < 1000) break;
+  }
 
   return (
     <Dashboard

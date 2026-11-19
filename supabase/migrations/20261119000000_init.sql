@@ -751,5 +751,6 @@ as $$
     join public.reports r on r.id = v.report_id
    where r.municipality_id = p_municipality_id
      and v.created_at > now() - make_interval(days => p_days)
-   group by v.report_id;
+   group by v.report_id
+   order by votes desc, v.report_id;
 $$;
