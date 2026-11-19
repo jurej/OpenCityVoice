@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { getAccess, getApprovedMembers, getBoundary, getCategories, getMunicipality, getReports, getStatuses } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
 import { Dashboard } from "./dashboard";
 
 export async function generateMetadata() {
@@ -19,6 +20,9 @@ export default async function ManagePage({ params, searchParams }: PageProps<"/[
     getBoundary(municipality.id),
     getAccess(municipality.id),
   ]);
+  const supabase = await createClient();
+  const { data: recent } = await supabase.rpc("recent_vote_counts", { p_municipality_id: municipality.id, p_days: 7 });
+  const recentVotes = Object.fromEntries((recent ?? []).map((r) => [r.report_id, Number(r.votes)]));
 
   return (
     <Dashboard
@@ -26,6 +30,7 @@ export default async function ManagePage({ params, searchParams }: PageProps<"/[
       categories={categories}
       statuses={statuses}
       reports={reports}
+      recentVotes={recentVotes}
       members={members}
       boundary={boundary}
       currentUserId={access.user!.id}

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ExternalLink, Forward, Link2, List, Loader2, Map as MapIcon, MapPin, Search, ThumbsUp, Trash2, X } from "lucide-react";
+import { ExternalLink, Forward, Link2, List, Loader2, Map as MapIcon, MapPin, Search, ThumbsUp, Trash2, TrendingUp, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ type Props = {
   categories: Category[];
   statuses: Status[];
   reports: ReportListItem[];
+  recentVotes: Record<string, number>;
   members: StaffMember[];
   boundary: GeoJSON.Geometry | null;
   currentUserId: string;
@@ -35,11 +36,13 @@ type Props = {
   initialSelected: string | null;
 };
 
-type Filters = { category: string; status: string; assignee: string; from: string; to: string; q: string };
-const emptyFilters: Filters = { category: "", status: "open", assignee: "", from: "", to: "", q: "" };
+type Sort = "newest" | "oldest" | "votes" | "trending";
+type Filters = { category: string; status: string; assignee: string; from: string; to: string; q: string; minVotes: number; sort: Sort };
+const emptyFilters: Filters = { category: "", status: "open", assignee: "", from: "", to: "", q: "", minVotes: 0, sort: "newest" };
+const voteThresholds = [1, 5, 10, 25, 50];
 
 export function Dashboard(props: Props) {
-  const { municipality, categories, statuses, reports, members, boundary, currentUserId } = props;
+  const { municipality, categories, statuses, reports, recentVotes, members, boundary, currentUserId } = props;
   const t = useTranslations("manage");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -55,7 +58,7 @@ export function Dashboard(props: Props) {
     const q = filters.q.trim().toLowerCase();
     const from = filters.from ? new Date(filters.from).getTime() : null;
     const to = filters.to ? new Date(filters.to).getTime() + 86_400_000 : null;
-    return reports.filter((r) => {
+    const result = reports.filter((r) => {
       const status = statusById.get(r.status_id);
       if (filters.category && r.category_id !== filters.category) return false;
       if (filters.status === "open" && status?.is_closed) return false;
@@ -67,9 +70,18 @@ export function Dashboard(props: Props) {
       if (from && created < from) return false;
       if (to && created >= to) return false;
       if (q && !`#${r.number} ${r.title ?? ""} ${r.description} ${r.address ?? ""}`.toLowerCase().includes(q)) return false;
+      if (r.vote_count < filters.minVotes) return false;
       return true;
     });
-  }, [reports, filters, statusById, currentUserId]);
+    const byDate = (a: ReportListItem, b: ReportListItem) => b.created_at.localeCompare(a.created_at);
+    const compare: Record<Sort, (a: ReportListItem, b: ReportListItem) => number> = {
+      newest: byDate,
+      oldest: (a, b) => -byDate(a, b),
+      votes: (a, b) => b.vote_count - a.vote_count || byDate(a, b),
+      trending: (a, b) => (recentVotes[b.id] ?? 0) - (recentVotes[a.id] ?? 0) || b.vote_count - a.vote_count || byDate(a, b),
+    };
+    return result.sort(compare[filters.sort]);
+  }, [reports, filters, statusById, currentUserId, recentVotes]);
 
   const [loadedAt] = useState(() => Date.now());
   const stats = useMemo(() => {
@@ -128,6 +140,17 @@ export function Dashboard(props: Props) {
               <option key={m.id} value={m.id}>{m.name ?? m.id.slice(0, 8)}</option>
             ))}
           </NativeSelect>
+          <NativeSelect value={String(filters.minVotes)} onChange={(e) => set({ minVotes: Number(e.target.value) })} className="w-[calc(50%-4px)] sm:w-44" aria-label={t("minVotes")}>
+            <option value="0">{t("anyVotes")}</option>
+            {voteThresholds.map((n) => (
+              <option key={n} value={n}>{t("minVotesOption", { count: n })}</option>
+            ))}
+          </NativeSelect>
+          <NativeSelect value={filters.sort} onChange={(e) => set({ sort: e.target.value as Sort })} className="w-[calc(50%-4px)] sm:w-52" aria-label={t("sort")}>
+            {(["newest", "oldest", "votes", "trending"] as const).map((key) => (
+              <option key={key} value={key}>{t(`sortOptions.${key}`)}</option>
+            ))}
+          </NativeSelect>
           <div className="flex w-[calc(50%-4px)] items-center gap-1 sm:w-auto">
             <Input type="date" value={filters.from} onChange={(e) => set({ from: e.target.value })} className="h-9 bg-background sm:w-36" aria-label={t("dateFrom")} />
             <span className="text-muted-foreground">–</span>
@@ -171,6 +194,12 @@ export function Dashboard(props: Props) {
                         <span className="font-mono">#{r.number}</span>
                         <TimeAgo date={r.created_at} />
                         <span className="inline-flex items-center gap-0.5"><ThumbsUp className="size-3" />{r.vote_count}</span>
+                        {(recentVotes[r.id] ?? 0) > 0 && (
+                          <span className="inline-flex items-center gap-0.5 font-medium text-emerald-700">
+                            <TrendingUp className="size-3" />
+                            {t("recentVotes", { count: recentVotes[r.id]! })}
+                          </span>
+                        )}
                       </div>
                       <p className="mt-0.5 line-clamp-1 text-sm font-medium">{r.title || r.description}</p>
                       <div className="mt-1.5 flex items-center gap-2">

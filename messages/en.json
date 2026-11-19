@@ -110,7 +110,12 @@
       "assigned": "Assigned to {name}",
       "unassigned": "Unassigned",
       "forwarded": "Forwarded to a responsible party"
-    }
+    },
+    "shareTitle": "Share this report",
+    "shareText": "More support helps the municipality prioritise. Share it with neighbours.",
+    "shareOn": "Share on {network}",
+    "shareEmail": "E-mail",
+    "shareMessage": "{title} – support this report in {municipality} on TownPing"
   },
   "newReport": {
     "title": "Report an issue",
@@ -224,7 +229,18 @@
       "votes": "Support"
     },
     "deleteReport": "Delete report",
-    "deleteReportConfirm": "Delete this report permanently? This cannot be undone."
+    "deleteReportConfirm": "Delete this report permanently? This cannot be undone.",
+    "sort": "Sort",
+    "sortOptions": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "votes": "Most votes",
+      "trending": "Trending (7 days)"
+    },
+    "minVotes": "Votes",
+    "anyVotes": "Any number of votes",
+    "minVotesOption": "{count}+ votes",
+    "recentVotes": "+{count} in 7 days"
   },
   "team": {
     "title": "Team and responsible people",

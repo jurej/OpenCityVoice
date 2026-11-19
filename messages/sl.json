@@ -110,7 +110,12 @@
       "assigned": "Dodeljeno: {name}",
       "unassigned": "Dodelitev odstranjena",
       "forwarded": "Posredovano odgovornim"
-    }
+    },
+    "shareTitle": "Delite pobudo",
+    "shareText": "Več podpore pomaga občini pri določanju prednosti. Delite jo s sosedi.",
+    "shareOn": "Deli na {network}",
+    "shareEmail": "E-pošta",
+    "shareMessage": "{title} – podprite pobudo v {municipality} na TownPing"
   },
   "newReport": {
     "title": "Prijavi težavo",
@@ -224,7 +229,18 @@
       "votes": "Podpora"
     },
     "deleteReport": "Izbriši pobudo",
-    "deleteReportConfirm": "Trajno izbrišem to pobudo? Tega ni mogoče razveljaviti."
+    "deleteReportConfirm": "Trajno izbrišem to pobudo? Tega ni mogoče razveljaviti.",
+    "sort": "Razvrsti",
+    "sortOptions": {
+      "newest": "Najnovejše",
+      "oldest": "Najstarejše",
+      "votes": "Največ glasov",
+      "trending": "Najhitreje rastoče (7 dni)"
+    },
+    "minVotes": "Glasovi",
+    "anyVotes": "Poljubno število glasov",
+    "minVotesOption": "{count}+ glasov",
+    "recentVotes": "+{count} v 7 dneh"
   },
   "team": {
     "title": "Ekipa in odgovorne osebe",

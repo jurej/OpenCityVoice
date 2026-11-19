@@ -738,3 +738,18 @@ revoke execute on function public.user_emails(uuid[]) from public, anon, authent
 revoke execute on function public.user_id_by_email(text) from public, anon, authenticated;
 grant execute on function public.user_emails(uuid[]) to service_role;
 grant execute on function public.user_id_by_email(text) to service_role;
+
+-- Votes per report received in the last p_days days, for "trending" sorting.
+create function public.recent_vote_counts(p_municipality_id uuid, p_days integer default 7)
+returns table (report_id uuid, votes bigint)
+language sql
+stable
+set search_path = ''
+as $$
+  select v.report_id, count(*) as votes
+    from public.report_votes v
+    join public.reports r on r.id = v.report_id
+   where r.municipality_id = p_municipality_id
+     and v.created_at > now() - make_interval(days => p_days)
+   group by v.report_id;
+$$;

@@ -91,3 +91,13 @@ update public.report_events e set created_at = r.created_at + interval '1 day',
   from public.reports r where e.report_id = r.id and e.type = 'status_changed';
 update public.report_comments c set created_at = r.created_at + interval '3 hours'
   from public.reports r where c.report_id = r.id;
+
+-- Spread demo votes over time so "trending" has something to show.
+insert into public.report_votes (report_id, user_id, created_at)
+select r.id, u.id, now() - (case when r.number = 1 then interval '20 days' else interval '2 days' end)
+  from public.reports r
+ cross join (values ('00000000-0000-4000-8000-000000000001'::uuid), ('00000000-0000-4000-8000-000000000004'::uuid)) as u(id)
+ where r.municipality_id = '10000000-0000-4000-8000-000000000001' and r.number in (1, 2, 4)
+on conflict do nothing;
+update public.report_votes v set created_at = now() - interval '15 days'
+  from public.reports r where r.id = v.report_id and r.number = 1 and r.municipality_id = '10000000-0000-4000-8000-000000000001';

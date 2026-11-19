@@ -615,6 +615,13 @@ export type Database = {
         Args: { p_lat: number; p_lng: number; p_municipality_id: string };
         Returns: boolean;
       };
+      recent_vote_counts: {
+        Args: { p_days?: number; p_municipality_id: string };
+        Returns: {
+          report_id: string;
+          votes: number;
+        }[];
+      };
       set_municipality_boundary: {
         Args: { p_geojson: Json; p_municipality_id: string };
         Returns: undefined;
