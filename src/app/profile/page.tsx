@@ -24,6 +24,9 @@ export default async function ProfilePage() {
       .limit(50),
     supabase.from("municipality_members").select("status, role, municipalities(slug, name)").eq("user_id", user.id),
   ]);
+  // Reports and memberships in deactivated municipalities have no visible municipality.
+  const visibleReports = (reports ?? []).filter((r) => r.municipalities);
+  const visibleMemberships = (memberships ?? []).filter((m) => m.municipalities);
 
   return (
     <>
@@ -36,7 +39,7 @@ export default async function ProfilePage() {
           emailNotifications={user.profile.email_notifications}
         />
 
-        {(memberships?.length || user.profile.is_platform_admin) && (
+        {(visibleMemberships.length > 0 || user.profile.is_platform_admin) && (
           <section>
             <h2 className="text-sm font-semibold">{t("memberships")}</h2>
             <ul className="mt-3 divide-y rounded-xl border">
@@ -48,7 +51,7 @@ export default async function ProfilePage() {
                   </Link>
                 </li>
               )}
-              {memberships?.map((m) => (
+              {visibleMemberships.map((m) => (
                 <li key={m.municipalities!.slug}>
                   <Link
                     href={m.status === "approved" ? `/${m.municipalities!.slug}/manage` : `/${m.municipalities!.slug}/join`}
@@ -67,7 +70,7 @@ export default async function ProfilePage() {
         <section>
           <h2 className="text-sm font-semibold">{t("myReports")}</h2>
           <ul className="mt-3 divide-y rounded-xl border">
-            {reports?.map((r) => (
+            {visibleReports.map((r) => (
               <li key={r.id}>
                 <Link
                   href={`/${r.municipalities!.slug}/reports/${r.number}`}
@@ -84,7 +87,7 @@ export default async function ProfilePage() {
                 </Link>
               </li>
             ))}
-            {!reports?.length && <li className="p-4 text-sm text-muted-foreground">{t("noReports")}</li>}
+            {!visibleReports.length && <li className="p-4 text-sm text-muted-foreground">{t("noReports")}</li>}
           </ul>
         </section>
       </main>

@@ -51,15 +51,26 @@ export const getStatuses = cache(async (municipalityId: string) => {
   return data ?? [];
 });
 
+const PAGE_SIZE = 1000; // Matches the Supabase API max_rows default.
+
 export async function getReports(municipalityId: string, limit = 2000): Promise<ReportListItem[]> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("reports")
-    .select(REPORT_LIST_COLUMNS)
-    .eq("municipality_id", municipalityId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return data ?? [];
+  const reports: ReportListItem[] = [];
+  while (reports.length < limit) {
+    const from = reports.length;
+    const to = Math.min(from + PAGE_SIZE, limit) - 1;
+    const { data } = await supabase
+      .from("reports")
+      .select(REPORT_LIST_COLUMNS)
+      .eq("municipality_id", municipalityId)
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(from, to);
+    if (!data?.length) break;
+    reports.push(...data);
+    if (data.length < to - from + 1) break;
+  }
+  return reports;
 }
 
 export const getMembership = cache(async (municipalityId: string) => {

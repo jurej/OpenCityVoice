@@ -26,7 +26,7 @@ export default async function MunicipalityPage({ params, searchParams }: PagePro
       <SiteHeader municipality={municipality} isStaff={access.isStaff} next={`/${slug}`} />
       <ExplorerView
         municipality={municipality}
-        categories={categories.filter((c) => c.is_active)}
+        categories={categories}
         statuses={statuses}
         reports={reports}
         boundary={boundary}

@@ -211,7 +211,7 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
             {tc("all")}
           </button>
         )}
-        {categories.map((c) => {
+        {categories.filter((c) => c.is_active).map((c) => {
           const active = activeCategories.includes(c.id);
           return (
             <button
