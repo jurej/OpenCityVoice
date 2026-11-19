@@ -65,6 +65,8 @@ export async function updateStatus(input: z.input<typeof statusSchema>): Promise
       .eq("report_id", report.id)
       .eq("type", "status_changed")
       .eq("actor_id", userId)
+      .eq("to_status_id", status.id)
+      .is("note", null)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
