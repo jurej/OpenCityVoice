@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import maplibregl, { type GeoJSONSource, type Map as MapLibreMap } from "maplibre-gl";
+import { maplibregl } from "./maplibre";
+import type { GeoJSONSource, MapLayerMouseEvent, MapMouseEvent, Map as MapLibreMap } from "maplibre-gl";
 import { mapStyleUrl } from "@/lib/config";
 
 export type MapPin = { id: string; lat: number; lng: number; color: string; closed?: boolean };
@@ -117,18 +118,18 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
       });
 
       if (!interactive) return;
-      map.on("click", "pins", (e) => {
+      map.on("click", "pins", (e: MapLayerMouseEvent) => {
         const id = e.features?.[0]?.properties?.id as string | undefined;
         if (id) onSelectRef.current?.(id);
       });
-      map.on("click", "clusters", async (e) => {
+      map.on("click", "clusters", async (e: MapLayerMouseEvent) => {
         const feature = e.features?.[0];
         if (!feature) return;
         const source = map.getSource("reports") as GeoJSONSource;
         const nextZoom = await source.getClusterExpansionZoom(feature.properties.cluster_id as number);
         map.easeTo({ center: (feature.geometry as GeoJSON.Point).coordinates as [number, number], zoom: nextZoom });
       });
-      map.on("click", (e) => {
+      map.on("click", (e: MapMouseEvent) => {
         const hits = map.queryRenderedFeatures(e.point, { layers: ["pins", "clusters"] });
         if (hits.length === 0) onSelectRef.current?.(null);
       });
@@ -170,5 +171,9 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
     };
   }, [selectedId]);
 
-  return <div ref={container} className={className} />;
+  return (
+    <div className={className}>
+      <div ref={container} className="size-full" />
+    </div>
+  );
 }

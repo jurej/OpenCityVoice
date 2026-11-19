@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import maplibregl, { type Map as MapLibreMap } from "maplibre-gl";
+import { maplibregl } from "./maplibre";
+import { type Map as MapLibreMap } from "maplibre-gl";
 import { mapStyleUrl } from "@/lib/config";
 
 type Props = {

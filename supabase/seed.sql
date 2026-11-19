@@ -82,3 +82,12 @@ select id, '00000000-0000-4000-8000-000000000002' from public.reports where numb
 
 insert into public.report_comments (report_id, author_id, body)
 select id, '00000000-0000-4000-8000-000000000003', 'Still there this morning, a car almost lost a wheel.' from public.reports where number = 1 and municipality_id = '10000000-0000-4000-8000-000000000001';
+
+-- Make demo timeline timestamps consistent with the backdated reports.
+update public.report_events e set created_at = r.created_at
+  from public.reports r where e.report_id = r.id and e.type = 'created';
+update public.report_events e set created_at = r.created_at + interval '1 day',
+  note = case when r.number = 6 then 'The bench was repaired by the parks department.' else 'Forwarded to the maintenance team.' end
+  from public.reports r where e.report_id = r.id and e.type = 'status_changed';
+update public.report_comments c set created_at = r.created_at + interval '3 hours'
+  from public.reports r where c.report_id = r.id;

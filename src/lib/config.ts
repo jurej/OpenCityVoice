@@ -3,15 +3,15 @@ export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:30
 export const mapStyleUrl =
   process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/positron";
 
+const supportedProviders = ["google", "facebook", "apple", "azure"] as const;
+export type OAuthProvider = (typeof supportedProviders)[number];
+
 export const oauthProviders = (process.env.NEXT_PUBLIC_AUTH_PROVIDERS ?? "")
   .split(",")
   .map((p) => p.trim())
   .filter((p): p is OAuthProvider => (supportedProviders as readonly string[]).includes(p));
 
 export const passwordLoginEnabled = process.env.NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN === "true";
-
-const supportedProviders = ["google", "facebook", "apple", "azure"] as const;
-export type OAuthProvider = (typeof supportedProviders)[number];
 
 export const providerLabels: Record<OAuthProvider, string> = {
   google: "Google",

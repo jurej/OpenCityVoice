@@ -79,7 +79,7 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
         {renderFilters()}
         <div className="flex items-center justify-between border-b px-4 py-2 text-xs text-muted-foreground">
           <span>
-            {visible.length} {t("reports").toLowerCase()}
+            {t("reports", { count: visible.length })}
           </span>
           <div className="flex gap-1">
             {(["newest", "votes"] as const).map((s) => (
@@ -135,7 +135,7 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
       {/* Map */}
       <section className={cn("relative min-h-0 flex-1", mobileView === "list" && "hidden md:block")}>
         <ReportMap
-          className="absolute inset-0"
+          className="absolute inset-0 [&_.maplibregl-ctrl-bottom-right]:mb-[72px] md:[&_.maplibregl-ctrl-bottom-right]:mb-0"
           center={[municipality.center_lat, municipality.center_lng]}
           zoom={municipality.default_zoom}
           pins={pins}
