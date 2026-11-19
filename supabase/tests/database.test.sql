@@ -1,0 +1,108 @@
+-- Database tests (pgTAP). Run with: supabase test db
+begin;
+create extension if not exists pgtap with schema extensions;
+select plan(17);
+
+-- Seed ids
+\set lj '\'10000000-0000-4000-8000-000000000001\''
+\set staff '\'00000000-0000-4000-8000-000000000002\''
+\set citizen '\'00000000-0000-4000-8000-000000000003\''
+\set pending '\'00000000-0000-4000-8000-000000000004\''
+
+create temporary table ctx as
+select
+  (select id from public.categories where municipality_id = :lj order by sort_order limit 1) as category_id,
+  (select id from public.statuses where municipality_id = :lj and is_initial) as initial_status,
+  (select id from public.statuses where municipality_id = :lj and is_closed order by sort_order limit 1) as closed_status;
+grant select on ctx to anon, authenticated;
+
+-- Boundary helpers
+select ok(public.point_in_municipality(:lj, 46.0511, 14.5051), 'Ljubljana centre is inside Ljubljana');
+select ok(not public.point_in_municipality(:lj, 46.2389, 14.3556), 'Kranj centre is outside Ljubljana');
+
+-- Anonymous visitors can read but not write
+set local role anon;
+select ok((select count(*) from public.reports where municipality_id = :lj) > 0, 'anon can read reports');
+select throws_ok(
+  format('insert into public.reports (municipality_id, category_id, author_id, description, lat, lng) values (%L, %L, %L, %L, 46.05, 14.50)',
+    :lj, (select category_id from ctx), :citizen, 'Anonymous report'),
+  '42501', null, 'anon cannot create reports');
+reset role;
+
+-- Citizens create reports as themselves
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :citizen, 'role', 'authenticated')::text, true);
+
+insert into public.reports (municipality_id, category_id, author_id, description, lat, lng)
+select :lj, category_id, :citizen, 'Broken bench in the park', 46.0512, 14.5052 from ctx;
+
+select is(
+  (select status_id from public.reports where description = 'Broken bench in the park'),
+  (select initial_status from ctx),
+  'new report gets the initial status');
+select is(
+  (select number from public.reports where description = 'Broken bench in the park'),
+  (select max(number) from public.reports where municipality_id = :lj),
+  'new report gets the next number');
+select throws_ok(
+  format('insert into public.reports (municipality_id, category_id, author_id, description, lat, lng) values (%L, %L, %L, %L, 46.05, 14.50)',
+    :lj, (select category_id from ctx), :staff, 'Impersonated report'),
+  '42501', null, 'citizens cannot create reports for someone else');
+
+-- Votes keep the counter in sync
+insert into public.report_votes (report_id, user_id)
+select id, :citizen from public.reports where description = 'Broken bench in the park';
+select is((select vote_count from public.reports where description = 'Broken bench in the park'), 1, 'voting increments vote_count');
+
+-- Duplicate detection finds open reports nearby
+select ok(
+  exists (select 1 from public.nearby_reports(:lj, 46.0514, 14.5054, 50, (select category_id from ctx))
+    where description = 'Broken bench in the park'),
+  'nearby_reports finds open reports within 50 m');
+
+-- Citizens cannot change the status
+update public.reports set status_id = (select closed_status from ctx) where description = 'Broken bench in the park';
+select is(
+  (select status_id from public.reports where description = 'Broken bench in the park'),
+  (select initial_status from ctx),
+  'citizens cannot change the status');
+
+-- Pending members are not staff
+select set_config('request.jwt.claims', json_build_object('sub', :pending, 'role', 'authenticated')::text, true);
+select ok(not public.is_municipality_staff(:lj), 'pending member is not staff');
+update public.reports set status_id = (select closed_status from ctx) where description = 'Broken bench in the park';
+select is(
+  (select status_id from public.reports where description = 'Broken bench in the park'),
+  (select initial_status from ctx),
+  'pending members cannot change the status');
+
+-- Approved staff change the status and the change is logged
+select set_config('request.jwt.claims', json_build_object('sub', :staff, 'role', 'authenticated')::text, true);
+update public.reports set status_id = (select closed_status from ctx) where description = 'Broken bench in the park';
+select is(
+  (select status_id from public.reports where description = 'Broken bench in the park'),
+  (select closed_status from ctx),
+  'staff can change the status');
+select is(
+  (select count(*)::int from public.report_events e join public.reports r on r.id = e.report_id
+    where r.description = 'Broken bench in the park' and e.type = 'status_changed'),
+  1,
+  'status change is recorded in the timeline');
+
+-- Closed reports are not offered as duplicates
+select ok(
+  not exists (select 1 from public.nearby_reports(:lj, 46.0512, 14.5052, 50, (select category_id from ctx))
+    where description = 'Broken bench in the park'),
+  'nearby_reports skips closed reports');
+
+-- Staff cannot rewrite citizen content or use another municipality's statuses
+select throws_ok(
+  $$update public.reports set description = 'Rewritten by staff' where description = 'Broken bench in the park'$$,
+  'P0001', 'Not allowed to change these report fields', 'staff cannot change report content');
+select throws_ok(
+  format('update public.reports set status_id = %L where description = %L',
+    (select id from public.statuses where municipality_id <> :lj limit 1), 'Broken bench in the park'),
+  'P0001', 'Invalid status', 'staff cannot use statuses of another municipality');
+
+select * from finish();
+rollback;
