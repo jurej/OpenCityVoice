@@ -391,12 +391,12 @@ function ReportPanel({ report, municipality, statuses, members, isAdmin, onClose
           </ol>
         </div>
       </div>
-      <ForwardDialog open={forwardOpen} onOpenChange={setForwardOpen} reportId={report.id} />
+      <ForwardDialog open={forwardOpen} onOpenChange={setForwardOpen} reportId={report.id} number={report.number} />
     </aside>
   );
 }
 
-function ForwardDialog({ open, onOpenChange, reportId }: { open: boolean; onOpenChange: (open: boolean) => void; reportId: string }) {
+function ForwardDialog({ open, onOpenChange, reportId, number }: { open: boolean; onOpenChange: (open: boolean) => void; reportId: string; number: number }) {
   const t = useTranslations("manage");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -425,7 +425,7 @@ function ForwardDialog({ open, onOpenChange, reportId }: { open: boolean; onOpen
     <Dialog open={open} onOpenChange={(value) => { onOpenChange(value); if (!value) setLink(null); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("forwardTitle")}</DialogTitle>
+          <DialogTitle>{t("forwardTitle", { number })}</DialogTitle>
           <DialogDescription>{t("forwardText")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
