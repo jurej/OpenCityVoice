@@ -49,7 +49,7 @@ export function NewReportWizard({ userId, municipality, categories, boundary }: 
   const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
-  const supabase = useRef(createClient()).current;
+  const [supabase] = useState(() => createClient());
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<Step>("photo");

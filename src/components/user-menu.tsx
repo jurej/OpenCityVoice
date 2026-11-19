@@ -109,6 +109,8 @@ export function UserMenu({ user, next = "/" }: Props) {
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        {/* Sign-out is a route handler, so it needs a full page navigation. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <DropdownMenuItem render={<a href="/auth/signout" />}>
           <LogOut />
           {t("signOut")}

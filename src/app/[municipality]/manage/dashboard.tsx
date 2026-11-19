@@ -71,8 +71,9 @@ export function Dashboard(props: Props) {
     });
   }, [reports, filters, statusById, currentUserId]);
 
+  const [loadedAt] = useState(() => Date.now());
   const stats = useMemo(() => {
-    const weekAgo = Date.now() - 7 * 86_400_000;
+    const weekAgo = loadedAt - 7 * 86_400_000;
     const closed = reports.filter((r) => statusById.get(r.status_id)?.is_closed).length;
     return {
       total: reports.length,
@@ -80,7 +81,7 @@ export function Dashboard(props: Props) {
       newThisWeek: reports.filter((r) => new Date(r.created_at).getTime() > weekAgo).length,
       closed,
     };
-  }, [reports, statusById]);
+  }, [reports, statusById, loadedAt]);
 
   const pins: Pin[] = useMemo(
     () =>
