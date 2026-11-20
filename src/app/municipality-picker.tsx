@@ -8,8 +8,9 @@ import { ChevronRight, LocateFixed, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { MunicipalityLogo } from "@/components/municipality-logo";
 
-type Item = { id: string; slug: string; name: string; primary_color: string };
+type Item = { id: string; slug: string; name: string; primary_color: string; logo_path: string | null };
 
 function normalize(value: string) {
   return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -74,7 +75,7 @@ export function MunicipalityPicker({ municipalities }: { municipalities: Item[] 
               href={`/${m.slug}`}
               className="flex items-center gap-3 rounded-lg px-2 py-3 text-sm hover:bg-muted"
             >
-              <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: m.primary_color }} />
+              <MunicipalityLogo name={m.name} logoPath={m.logo_path} color={m.primary_color} />
               <span className="flex-1 font-medium">{m.name}</span>
               <ChevronRight className="size-4 text-muted-foreground" />
             </Link>

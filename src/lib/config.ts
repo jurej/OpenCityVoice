@@ -21,6 +21,11 @@ export const providerLabels: Record<OAuthProvider, string> = {
 };
 
 export const PHOTO_BUCKET = "report-photos";
+export const LOGO_BUCKET = "municipality-logos";
+
+export function logoUrl(path: string) {
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${LOGO_BUCKET}/${path}`;
+}
 export const MAX_PHOTOS = 4;
 
 export function photoUrl(path: string) {

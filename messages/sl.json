@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "TownPing",
+    "appName": "OpenCityVoice",
     "tagline": "Prijavite težavo v svojem kraju v manj kot minuti.",
     "signIn": "Prijava",
     "signOut": "Odjava",
@@ -29,7 +29,7 @@
     "search": "Iskanje",
     "manage": "Upravljanje",
     "reportIssue": "Prijavi težavo",
-    "poweredBy": "Deluje na TownPing, odprta koda"
+    "poweredBy": "Deluje na OpenCityVoice, odprta koda"
   },
   "home": {
     "title": "Vaš kraj, en dotik stran",
@@ -38,7 +38,7 @@
     "searchPlaceholder": "Iskanje občine",
     "useLocation": "Uporabi mojo lokacijo",
     "locating": "Iščem vašo občino …",
-    "notFound": "Vaša lokacija še ni v občini, ki uporablja TownPing.",
+    "notFound": "Vaša lokacija še ni v občini, ki uporablja OpenCityVoice.",
     "locationDenied": "Dostop do lokacije je zavrnjen. Občino izberite s seznama.",
     "noResults": "Nobena občina ne ustreza iskanju.",
     "steps": {
@@ -53,7 +53,7 @@
     "forMunicipalitiesText": "Osrednji zemljevid vseh pobud, statusi, dodeljevanje odgovornim osebam in posredovanje po e-pošti. Brezplačno in odprtokodno."
   },
   "auth": {
-    "title": "Prijava v TownPing",
+    "title": "Prijava v OpenCityVoice",
     "subtitle": "Po prijavi lahko oddajate pobude, glasujete in komentirate. Ogled je odprt za vse.",
     "continueWith": "Nadaljuj z {provider}",
     "or": "ali",
@@ -115,7 +115,7 @@
     "shareText": "Več podpore pomaga občini pri določanju prednosti. Delite jo s sosedi.",
     "shareOn": "Deli na {network}",
     "shareEmail": "E-pošta",
-    "shareMessage": "{title} – podprite pobudo v {municipality} na TownPing"
+    "shareMessage": "{title} – podprite pobudo v {municipality} na OpenCityVoice"
   },
   "newReport": {
     "title": "Prijavi težavo",
@@ -249,7 +249,7 @@
     "inviteLinkText": "Povezavo delite z osebami, ki potrebujejo dostop. Prijavijo se in zaprosijo za dostop, vi jih odobrite tukaj.",
     "addByEmail": "Dodaj registriranega uporabnika po e-naslovu",
     "addMember": "Dodaj",
-    "userNotFound": "Uporabnika s tem e-naslovom ni. Naj se najprej prijavi v TownPing ali mu pošljite povezavo za pridružitev.",
+    "userNotFound": "Uporabnika s tem e-naslovom ni. Naj se najprej prijavi v OpenCityVoice ali mu pošljite povezavo za pridružitev.",
     "memberAdded": "Član dodan",
     "pendingRequests": "Zahteve v čakanju",
     "noPending": "Ni zahtev v čakanju.",
@@ -296,7 +296,13 @@
     "closed": "Zaključni",
     "moveUp": "Premakni gor",
     "moveDown": "Premakni dol",
-    "inUse": "Element uporabljajo obstoječe pobude. Namesto brisanja ga deaktivirajte."
+    "inUse": "Element uporabljajo obstoječe pobude. Namesto brisanja ga deaktivirajte.",
+    "logo": "Logotip",
+    "logoText": "Prikazan je ob imenu občine v aplikaciji in v e-pošti. PNG, JPG ali WebP do 1 MB; najbolje deluje kvadratna slika.",
+    "uploadLogo": "Naloži logotip",
+    "replaceLogo": "Zamenjaj",
+    "removeLogo": "Odstrani",
+    "logoTooLarge": "Logotip mora biti manjši od 1 MB."
   },
   "admin": {
     "title": "Administracija platforme",
@@ -328,7 +334,7 @@
     "statusIntro": "Status vaše pobude \"{title}\" ({municipality}) je zdaj: {status}.",
     "statusNote": "Opomba občine:",
     "viewReport": "Ogled pobude",
-    "unsubscribe": "To e-pošto prejemate, ker imate v profilu TownPing vklopljena obvestila. Izklopite jih lahko na {url}.",
+    "unsubscribe": "To e-pošto prejemate, ker imate v profilu OpenCityVoice vklopljena obvestila. Izklopite jih lahko na {url}.",
     "forwardSubject": "{municipality}: posredovana pobuda #{number}",
     "forwardIntro": "{sender} ({municipality}) vam je posredoval/a pobudo #{number}.",
     "forwardMessage": "Sporočilo:",

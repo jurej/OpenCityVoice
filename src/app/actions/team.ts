@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, emailBrand } from "@/lib/email";
 import { siteUrl } from "@/lib/config";
 import type { MemberRole } from "@/lib/types";
 
@@ -18,7 +18,7 @@ async function adminContext(municipalityId: string) {
   if (!isAdmin) return null;
   const { data: municipality } = await supabase
     .from("municipalities")
-    .select("slug, name, primary_color")
+    .select("slug, name, primary_color, logo_path")
     .eq("id", municipalityId)
     .single();
   if (!municipality) return null;
@@ -69,6 +69,7 @@ export async function setMemberStatus(
         paragraphs: [t("memberApprovedIntro", { municipality: ctx.municipality.name })],
         action: { label: t("openDashboard"), url: `${siteUrl}/${ctx.municipality.slug}/manage` },
         accentColor: ctx.municipality.primary_color,
+        brand: emailBrand(ctx.municipality),
       });
     }
   }

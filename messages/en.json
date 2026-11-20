@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "TownPing",
+    "appName": "OpenCityVoice",
     "tagline": "Report issues in your town in under a minute.",
     "signIn": "Sign in",
     "signOut": "Sign out",
@@ -29,7 +29,7 @@
     "search": "Search",
     "manage": "Manage",
     "reportIssue": "Report an issue",
-    "poweredBy": "Powered by TownPing, open source"
+    "poweredBy": "Powered by OpenCityVoice, open source"
   },
   "home": {
     "title": "Your town, one tap away",
@@ -38,7 +38,7 @@
     "searchPlaceholder": "Search municipalities",
     "useLocation": "Use my location",
     "locating": "Finding your municipality…",
-    "notFound": "Your location is not inside a municipality that uses TownPing yet.",
+    "notFound": "Your location is not inside a municipality that uses OpenCityVoice yet.",
     "locationDenied": "Location access was denied. Choose your municipality from the list.",
     "noResults": "No municipalities match your search.",
     "steps": {
@@ -53,7 +53,7 @@
     "forMunicipalitiesText": "A central map of all reports, workflow statuses, assignments to responsible people and forwarding by e-mail. Free and open source."
   },
   "auth": {
-    "title": "Sign in to TownPing",
+    "title": "Sign in to OpenCityVoice",
     "subtitle": "Signing in lets you report issues, vote and comment. Browsing is open to everyone.",
     "continueWith": "Continue with {provider}",
     "or": "or",
@@ -115,7 +115,7 @@
     "shareText": "More support helps the municipality prioritise. Share it with neighbours.",
     "shareOn": "Share on {network}",
     "shareEmail": "E-mail",
-    "shareMessage": "{title} – support this report in {municipality} on TownPing"
+    "shareMessage": "{title} – support this report in {municipality} on OpenCityVoice"
   },
   "newReport": {
     "title": "Report an issue",
@@ -249,7 +249,7 @@
     "inviteLinkText": "Share this link with people who should get access. They sign in and request access, you approve them here.",
     "addByEmail": "Add a registered user by e-mail",
     "addMember": "Add",
-    "userNotFound": "No user with this e-mail. Ask them to sign in to TownPing first, or share the join link.",
+    "userNotFound": "No user with this e-mail. Ask them to sign in to OpenCityVoice first, or share the join link.",
     "memberAdded": "Member added",
     "pendingRequests": "Pending requests",
     "noPending": "No pending requests.",
@@ -296,7 +296,13 @@
     "closed": "Closed",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "inUse": "This item is used by existing reports. Deactivate it instead."
+    "inUse": "This item is used by existing reports. Deactivate it instead.",
+    "logo": "Logo",
+    "logoText": "Shown next to the municipality name in the app and in e-mails. PNG, JPG or WebP up to 1 MB; a square image works best.",
+    "uploadLogo": "Upload logo",
+    "replaceLogo": "Replace",
+    "removeLogo": "Remove",
+    "logoTooLarge": "The logo must be smaller than 1 MB."
   },
   "admin": {
     "title": "Platform administration",
@@ -328,7 +334,7 @@
     "statusIntro": "The status of your report \"{title}\" in {municipality} is now: {status}.",
     "statusNote": "Note from the municipality:",
     "viewReport": "View report",
-    "unsubscribe": "You receive this e-mail because notifications are enabled in your TownPing profile. You can turn them off at {url}.",
+    "unsubscribe": "You receive this e-mail because notifications are enabled in your OpenCityVoice profile. You can turn them off at {url}.",
     "forwardSubject": "{municipality}: report #{number} forwarded to you",
     "forwardIntro": "{sender} from {municipality} forwarded report #{number} to you.",
     "forwardMessage": "Message:",

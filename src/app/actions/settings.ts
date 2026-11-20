@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { LOGO_BUCKET } from "@/lib/config";
 
 type Result = { ok: true } | { ok: false; error?: string };
 
@@ -42,6 +43,17 @@ export async function updateMunicipality(municipalityId: string, input: z.input<
     .update({ ...parsed.data, contact_email: parsed.data.contact_email || null, website_url: parsed.data.website_url || null })
     .eq("id", municipalityId);
   return error ? { ok: false } : done(ctx.slug);
+}
+
+export async function setLogo(municipalityId: string, path: string | null): Promise<Result> {
+  const ctx = await adminClient(municipalityId);
+  if (!ctx) return { ok: false };
+  if (path !== null && !new RegExp(`^${municipalityId}/[\\w-]+\\.(png|jpe?g|webp)$`).test(path)) return { ok: false, error: "invalid" };
+  const { data: current } = await ctx.supabase.from("municipalities").select("logo_path").eq("id", municipalityId).single();
+  const { error } = await ctx.supabase.from("municipalities").update({ logo_path: path }).eq("id", municipalityId);
+  if (error) return { ok: false };
+  if (current?.logo_path && current.logo_path !== path) await ctx.supabase.storage.from(LOGO_BUCKET).remove([current.logo_path]);
+  return done(ctx.slug);
 }
 
 export async function setBoundary(municipalityId: string, geojson: unknown | null): Promise<Result> {

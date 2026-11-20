@@ -4,9 +4,10 @@ import { Brand } from "@/components/brand";
 import { UserMenu } from "@/components/user-menu";
 import { getCurrentUser } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { MunicipalityLogo } from "@/components/municipality-logo";
 
 type Props = {
-  municipality?: { slug: string; name: string } | null;
+  municipality?: { slug: string; name: string; logo_path?: string | null; primary_color?: string | null } | null;
   isStaff?: boolean;
   next?: string;
   className?: string;
@@ -22,8 +23,9 @@ export async function SiteHeader({ municipality, isStaff, next, className }: Pro
         {municipality && (
           <>
             <span className="text-border" aria-hidden="true">/</span>
-            <Link href={`/${municipality.slug}`} className="min-w-0 truncate text-sm font-medium">
-              {municipality.name}
+            <Link href={`/${municipality.slug}`} className="flex min-w-0 items-center gap-2 text-sm font-medium">
+              <MunicipalityLogo name={municipality.name} logoPath={municipality.logo_path} color={municipality.primary_color} className="size-6" />
+              <span className="truncate">{municipality.name}</span>
             </Link>
           </>
         )}

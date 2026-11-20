@@ -1,6 +1,6 @@
-# TownPing
+# OpenCityVoice
 
-TownPing is an open-source platform where citizens report issues and suggestions to their municipality: a pothole, a broken street light, an illegal dump or an idea for a better town. One deployment serves many municipalities.
+OpenCityVoice is an open-source platform where citizens report issues and suggestions to their municipality: a pothole, a broken street light, an illegal dump or an idea for a better town. One deployment serves many municipalities.
 
 - **Citizens** take a photo, drop a pin and add a short description. Reports are public right away, and anyone can browse, support (vote) and comment. Authors get an e-mail when the status changes.
 - **Municipalities** get a map dashboard with filters, statuses, assignment to responsible people, forwarding by e-mail or link, team approval and their own categories and statuses.
@@ -48,10 +48,10 @@ The seed creates two municipalities (`/ljubljana`, `/kranj`), sample reports and
 
 | E-mail | Role |
 | --- | --- |
-| `admin@townping.local` | Platform admin |
-| `staff@ljubljana.townping.local` | Admin of Ljubljana |
-| `citizen@townping.local` | Citizen |
-| `pending@townping.local` | Pending join request for Ljubljana |
+| `admin@opencityvoice.local` | Platform admin |
+| `staff@ljubljana.opencityvoice.local` | Admin of Ljubljana |
+| `citizen@opencityvoice.local` | Citizen |
+| `pending@opencityvoice.local` | Pending join request for Ljubljana |
 
 ### Scripts
 

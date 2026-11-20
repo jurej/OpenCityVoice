@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `/${slug}/reports/${report.number}` },
-    openGraph: { type: "article", title, description, images, siteName: "TownPing" },
+    openGraph: { type: "article", title, description, images, siteName: "OpenCityVoice" },
     twitter: { card: images.length ? "summary_large_image" : "summary", title, description, images },
   };
 }
