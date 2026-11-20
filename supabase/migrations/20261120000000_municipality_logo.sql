@@ -10,3 +10,6 @@ create policy "Municipality admins upload logos" on storage.objects for insert t
   with check (bucket_id = 'municipality-logos' and public.is_municipality_admin(((storage.foldername(name))[1])::uuid));
 create policy "Municipality admins delete logos" on storage.objects for delete to authenticated
   using (bucket_id = 'municipality-logos' and public.is_municipality_admin(((storage.foldername(name))[1])::uuid));
+-- Storage deletes need SELECT on the object as well.
+create policy "Municipality admins read own logo objects" on storage.objects for select to authenticated
+  using (bucket_id = 'municipality-logos' and public.is_municipality_admin(((storage.foldername(name))[1])::uuid));
