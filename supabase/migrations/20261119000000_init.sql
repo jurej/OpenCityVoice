@@ -1,4 +1,4 @@
--- TownPing initial schema
+-- OpenCityVoice initial schema
 -- Multi-tenant: every municipality owns its categories, statuses, members and reports.
 
 create extension if not exists postgis with schema extensions;

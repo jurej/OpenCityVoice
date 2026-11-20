@@ -10,7 +10,7 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: municipalities } = await supabase
     .from("municipalities")
-    .select("id, slug, name, primary_color")
+    .select("id, slug, name, primary_color, logo_path")
     .eq("is_active", true)
     .order("name");
 
@@ -59,7 +59,7 @@ export default async function HomePage() {
       <footer className="border-t">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6 text-xs text-muted-foreground">
           <span>{tc("poweredBy")}</span>
-          <a href="https://github.com/jurej/townping" className="hover:text-foreground">GitHub</a>
+          <a href="https://github.com/jurej/OpenCityVoice" className="hover:text-foreground">GitHub</a>
         </div>
       </footer>
     </>

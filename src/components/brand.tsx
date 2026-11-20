@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** TownPing mark: a map pin with a signal ring. */
+/** OpenCityVoice mark: a map pin with a signal ring. */
 export function BrandMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={cn("size-6", className)}>
@@ -19,7 +19,7 @@ export function Brand({ href = "/", className }: { href?: string; className?: st
   return (
     <Link href={href} className={cn("flex items-center gap-2 font-semibold tracking-tight", className)}>
       <BrandMark />
-      <span>TownPing</span>
+      <span>OpenCityVoice</span>
     </Link>
   );
 }

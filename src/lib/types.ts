@@ -38,4 +38,4 @@ export type ReportListItem = Pick<
 export type PublicMunicipality = Omit<Municipality, "boundary" | "report_seq">;
 
 export const MUNICIPALITY_COLUMNS =
-  "id, slug, name, contact_email, website_url, primary_color, center_lat, center_lng, default_zoom, is_active, created_at" as const;
+  "id, slug, name, contact_email, website_url, primary_color, center_lat, center_lng, default_zoom, logo_path, is_active, created_at" as const;

@@ -96,6 +96,7 @@ export type Database = {
           default_zoom: number;
           id: string;
           is_active: boolean;
+          logo_path: string | null;
           name: string;
           primary_color: string;
           report_seq: number;
@@ -112,6 +113,7 @@ export type Database = {
           default_zoom?: number;
           id?: string;
           is_active?: boolean;
+          logo_path?: string | null;
           name: string;
           primary_color?: string;
           report_seq?: number;
@@ -127,6 +129,7 @@ export type Database = {
           default_zoom?: number;
           id?: string;
           is_active?: boolean;
+          logo_path?: string | null;
           name?: string;
           primary_color?: string;
           report_seq?: number;
@@ -573,6 +576,7 @@ export type Database = {
           default_zoom: number;
           id: string;
           is_active: boolean;
+          logo_path: string | null;
           name: string;
           primary_color: string;
           report_seq: number;

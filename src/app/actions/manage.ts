@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, emailBrand } from "@/lib/email";
 import { localized } from "@/i18n/config";
 import { siteUrl } from "@/lib/config";
 
@@ -17,7 +17,7 @@ async function staffContext(reportId: string) {
   if (!claims?.claims) return null;
   const { data: report } = await supabase
     .from("reports")
-    .select("id, number, title, description, municipality_id, author_id, status_id, municipalities(slug, name, primary_color)")
+    .select("id, number, title, description, municipality_id, author_id, status_id, municipalities(slug, name, primary_color, logo_path)")
     .eq("id", reportId)
     .single();
   if (!report) return null;
@@ -107,6 +107,7 @@ async function notifyAuthor(
     action: { label: t("viewReport"), url: `${siteUrl}/${municipality.slug}/reports/${report.number}` },
     footer: t("unsubscribe", { url: `${siteUrl}/profile` }),
     accentColor: municipality.primary_color,
+      brand: emailBrand(municipality),
   });
 }
 
@@ -144,6 +145,7 @@ export async function assignReport(reportId: string, assigneeId: string | null):
         paragraphs: [t("assignIntro", { number: report.number, title: report.title || report.description.slice(0, 80) })],
         action: { label: t("openDashboard"), url: `${siteUrl}/${municipality.slug}/manage?report=${report.id}` },
         accentColor: municipality.primary_color,
+      brand: emailBrand(municipality),
       });
     }
   }
@@ -196,6 +198,7 @@ export async function forwardReport(
       quote: parsed.data.message ? { label: t("forwardMessage"), text: parsed.data.message } : null,
       action: { label: t("openReport"), url },
       accentColor: municipality.primary_color,
+      brand: emailBrand(municipality),
     });
   }
   revalidateReport(report.municipalities!.slug, report.number);

@@ -13,7 +13,10 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CategoryIcon, categoryIcons } from "@/components/category-icon";
 import { StatusBadge } from "@/components/report-bits";
-import { deleteItem, moveItem, saveCategory, saveStatus, setBoundary, updateMunicipality } from "@/app/actions/settings";
+import { deleteItem, moveItem, saveCategory, saveStatus, setBoundary, setLogo, updateMunicipality } from "@/app/actions/settings";
+import { MunicipalityLogo } from "@/components/municipality-logo";
+import { createClient } from "@/lib/supabase/client";
+import { LOGO_BUCKET } from "@/lib/config";
 import { localeNames, locales, localized } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import type { StaffMember } from "@/lib/data";
@@ -57,6 +60,49 @@ export function SettingsView({ municipality, categories, statuses, members, boun
         <MunicipalityForm municipality={municipality} hasBoundary={Boolean(boundary)} />
         <ItemList kind="categories" municipalityId={municipality.id} items={categories} members={members} />
         <ItemList kind="statuses" municipalityId={municipality.id} items={statuses} members={members} />
+      </div>
+    </div>
+  );
+}
+
+const LOGO_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+
+function LogoForm({ municipality }: { municipality: PublicMunicipality }) {
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
+  const { pending, run } = useAction();
+  const [uploading, setUploading] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+
+  async function upload(file: File | undefined) {
+    if (input.current) input.current.value = "";
+    if (!file) return;
+    const ext = LOGO_TYPES[file.type];
+    if (!ext) return toast.error(tc("error"));
+    if (file.size > 1024 * 1024) return toast.error(t("logoTooLarge"));
+    setUploading(true);
+    const path = `${municipality.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await createClient().storage.from(LOGO_BUCKET).upload(path, file, { contentType: file.type });
+    setUploading(false);
+    if (error) return toast.error(tc("error"));
+    run(() => setLogo(municipality.id, path));
+  }
+
+  return (
+    <div className="mt-6 border-t pt-5">
+      <h3 className="text-sm font-semibold">{t("logo")}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{t("logoText")}</p>
+      <div className="mt-4 flex items-center gap-3">
+        <MunicipalityLogo name={municipality.name} logoPath={municipality.logo_path} color={municipality.primary_color} className="size-14 rounded-lg border text-lg" />
+        <input ref={input} type="file" accept={Object.keys(LOGO_TYPES).join(",")} className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
+        <Button type="button" variant="outline" disabled={pending || uploading} onClick={() => input.current?.click()}>
+          {municipality.logo_path ? t("replaceLogo") : t("uploadLogo")}
+        </Button>
+        {municipality.logo_path && (
+          <Button type="button" variant="ghost" disabled={pending || uploading} onClick={() => run(() => setLogo(municipality.id, null))}>
+            {t("removeLogo")}
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -129,6 +175,7 @@ function MunicipalityForm({ municipality, hasBoundary }: { municipality: PublicM
           <Button type="submit" disabled={pending}>{tc("save")}</Button>
         </div>
       </form>
+      <LogoForm municipality={municipality} />
       <div className="mt-6 border-t pt-5">
         <h3 className="text-sm font-semibold">{t("boundary")}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{t("boundaryText")}</p>
