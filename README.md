@@ -70,7 +70,7 @@ The cheapest setup is [Vercel](https://vercel.com) (Hobby or Pro) and [Supabase]
 
 1. Create a Supabase project and run `supabase link` and `supabase db push`.
 2. In Supabase Auth, set the site URL and add `https://your-domain/auth/callback` to redirect URLs. Enable the OAuth providers you need.
-3. Set the environment variables from `.env.example` on your host. `NEXT_PUBLIC_AUTH_PROVIDERS` lists the enabled providers, e.g. `google,facebook`.
+3. Set the environment variables from `.env.example` on your host. `NEXT_PUBLIC_AUTH_PROVIDERS` lists the enabled providers, e.g. `google,facebook`. For a deployment that serves one municipality (e.g. on the municipality's own domain), set `SINGLE_MUNICIPALITY` to its slug: `/` opens that municipality, the header shows its name and logo, and other municipalities return 404.
 4. Use a transactional e-mail provider (Resend, Postmark, SES, ...) for `SMTP_URL`, and configure the same SMTP in Supabase Auth for sign-in e-mails.
 5. Sign in, then mark your profile as platform admin: `update profiles set is_platform_admin = true where id = '<your user id>';`. Add municipalities at `/admin`.
 

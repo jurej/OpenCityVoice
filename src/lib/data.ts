@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { singleMunicipality } from "@/lib/config";
 import { MUNICIPALITY_COLUMNS, REPORT_LIST_COLUMNS, type ReportListItem } from "@/lib/types";
 
 export const getCurrentUser = cache(async () => {
@@ -23,6 +24,7 @@ export async function requireUser(next: string) {
 }
 
 export const getMunicipality = cache(async (slug: string) => {
+  if (singleMunicipality && slug !== singleMunicipality) notFound();
   const supabase = await createClient();
   const { data } = await supabase.from("municipalities").select(MUNICIPALITY_COLUMNS).eq("slug", slug).maybeSingle();
   if (!data) notFound();

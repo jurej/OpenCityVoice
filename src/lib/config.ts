@@ -11,6 +11,9 @@ export const oauthProviders = (process.env.NEXT_PUBLIC_AUTH_PROVIDERS ?? "")
   .map((p) => p.trim())
   .filter((p): p is OAuthProvider => (supportedProviders as readonly string[]).includes(p));
 
+/** Slug of the only municipality served by this deployment; unset for multi-municipality mode. Server-only. */
+export const singleMunicipality = process.env.SINGLE_MUNICIPALITY?.trim() || null;
+
 export const passwordLoginEnabled = process.env.NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN === "true";
 
 export const providerLabels: Record<OAuthProvider, string> = {
