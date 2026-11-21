@@ -68,7 +68,7 @@ const createReportSchema = z.object({
 
 export type CreateReportResult =
   | { ok: true; number: number }
-  | { ok: false; error: "invalid" | "outside" | "failed" };
+  | { ok: false; error: "invalid" | "outside" | "rateLimited" | "failed" };
 
 export async function createReport(input: z.input<typeof createReportSchema>): Promise<CreateReportResult> {
   const parsed = createReportSchema.safeParse(input);
@@ -104,6 +104,7 @@ export async function createReport(input: z.input<typeof createReportSchema>): P
     })
     .select("id, number")
     .single();
+  if (error?.message === "rate_limited") return { ok: false, error: "rateLimited" };
   if (error || !report) {
     console.error("[createReport]", error);
     return { ok: false, error: "failed" };

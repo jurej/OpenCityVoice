@@ -151,7 +151,8 @@
     "duplicatesText": "Je to ena od njih? Podpora obstoječi pobudi pomaga bolj kot podvojena prijava.",
     "supportThis": "Podpri to",
     "notDuplicate": "Nobena od teh, nadaljuj",
-    "metersAway": "{meters} m stran"
+    "metersAway": "{meters} m stran",
+    "rateLimited": "V kratkem času ste oddali veliko pobud. Poskusite znova pozneje."
   },
   "profile": {
     "title": "Vaš profil",
