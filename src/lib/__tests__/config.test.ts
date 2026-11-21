@@ -8,6 +8,7 @@ describe("safeNext", () => {
 
   it("blocks open redirects", () => {
     expect(safeNext("https://evil.example")).toBe("/");
+    expect(safeNext("/\\evil.example")).toBe("/");
     expect(safeNext("//evil.example")).toBe("/");
     expect(safeNext(undefined, "/profile")).toBe("/profile");
   });

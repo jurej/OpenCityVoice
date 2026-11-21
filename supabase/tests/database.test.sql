@@ -1,7 +1,7 @@
 -- Database tests (pgTAP). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(24);
 
 -- Seed ids
 \set lj '\'10000000-0000-4000-8000-000000000001\''
@@ -122,6 +122,36 @@ select set_config('request.jwt.claims', json_build_object('sub', :pending, 'role
 select throws_ok(
   format('select public.set_notification_preferences(%L, %L::uuid[], true)', :lj, '{}'),
   'P0001', 'Not allowed', 'pending members cannot set notification preferences');
+reset role;
+
+-- Security hardening: server timestamps and rate limits
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :citizen, 'role', 'authenticated')::text, true);
+insert into public.report_votes (report_id, user_id, created_at)
+select id, :citizen, '2000-01-01' from public.reports
+ where municipality_id = :lj and id not in (select report_id from public.report_votes where user_id = :citizen)
+ limit 1;
+select ok(
+  (select min(created_at) > now() - interval '1 minute' from public.report_votes where user_id = :citizen and created_at > '2001-01-01'),
+  'vote timestamps are set by the server');
+reset role;
+select set_config('test.remaining',
+  (10 - (select count(*) from public.rate_limit_events where user_id = :citizen and kind = 'report'))::text, true);
+set local role authenticated;
+select lives_ok(
+  format($f$do $d$ begin for i in 1..%s loop
+    insert into public.reports (municipality_id, category_id, author_id, description, lat, lng)
+    values (%L, %L, %L, 'Rate limit test', 46.05, 14.50);
+  end loop; end $d$$f$, current_setting('test.remaining'), :lj, (select category_id from ctx), :citizen),
+  'citizens can submit 10 reports per hour');
+delete from public.reports where author_id = :citizen and description = 'Rate limit test';
+select throws_ok(
+  format($f$insert into public.reports (municipality_id, category_id, author_id, description, lat, lng)
+    values (%L, %L, %L, 'Rate limit test', 46.05, 14.50)$f$, :lj, (select category_id from ctx), :citizen),
+  'P0001', 'rate_limited', 'the 11th report in an hour is rejected, even after deleting earlier ones');
+select throws_ok(
+  'select public.prepare_new_report()',
+  '42501', null, 'trigger functions cannot be called through the API');
 reset role;
 
 select * from finish();

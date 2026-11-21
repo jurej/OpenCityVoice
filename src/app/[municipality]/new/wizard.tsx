@@ -195,7 +195,13 @@ export function NewReportWizard({ userId, municipality, categories, boundary }: 
     });
     setSubmitting(false);
     if (!result.ok) {
-      toast.error(result.error === "outside" ? t("outsideMunicipality", { municipality: municipality.name }) : tc("error"));
+      toast.error(
+        result.error === "outside"
+          ? t("outsideMunicipality", { municipality: municipality.name })
+          : result.error === "rateLimited"
+            ? t("rateLimited")
+            : tc("error"),
+      );
       return;
     }
     setCreatedNumber(result.number);

@@ -37,5 +37,6 @@ export function photoUrl(path: string) {
 
 /** Only allow same-origin relative redirects. */
 export function safeNext(next: string | null | undefined, fallback = "/") {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+  // Browsers treat "/\\host" like "//host", so backslashes would allow open redirects.
+  return next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : fallback;
 }

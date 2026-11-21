@@ -151,7 +151,8 @@
     "duplicatesText": "Is it one of these? Supporting an existing report helps more than a duplicate.",
     "supportThis": "Support this one",
     "notDuplicate": "None of these, continue",
-    "metersAway": "{meters} m away"
+    "metersAway": "{meters} m away",
+    "rateLimited": "You have submitted many reports in a short time. Please try again later."
   },
   "profile": {
     "title": "Your profile",

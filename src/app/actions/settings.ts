@@ -26,7 +26,7 @@ function done(slug: string): Result {
 const municipalitySchema = z.object({
   name: z.string().trim().min(2).max(120),
   contact_email: z.email().or(z.literal("")).optional(),
-  website_url: z.url().or(z.literal("")).optional(),
+  website_url: z.url({ protocol: /^https?$/ }).or(z.literal("")).optional(),
   primary_color: color,
   center_lat: z.number().min(-90).max(90),
   center_lng: z.number().min(-180).max(180),
