@@ -65,7 +65,7 @@ export default async function HomePage() {
           <span>{tc("poweredBy")}</span>
           <div className="flex gap-4">
             <LegalLinks />
-            <a href="https://github.com/jurej/OpenCityVoice" className="hover:text-foreground">GitHub</a>
+            <a href="https://github.com/opencityvoice/OpenCityVoice" className="hover:text-foreground">GitHub</a>
           </div>
         </div>
       </footer>
