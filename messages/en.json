@@ -305,7 +305,8 @@
     "uploadLogo": "Upload logo",
     "replaceLogo": "Replace",
     "removeLogo": "Remove",
-    "logoTooLarge": "The logo must be smaller than 1 MB."
+    "logoTooLarge": "The logo must be smaller than 1 MB.",
+    "defaultMapStyle": "Default map style"
   },
   "admin": {
     "title": "Platform administration",

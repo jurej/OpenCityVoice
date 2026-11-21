@@ -31,6 +31,7 @@ const municipalitySchema = z.object({
   center_lat: z.number().min(-90).max(90),
   center_lng: z.number().min(-180).max(180),
   default_zoom: z.number().min(3).max(19),
+  default_map_style: z.enum(["map", "detailed", "satellite"]),
 });
 
 export async function updateMunicipality(municipalityId: string, input: z.input<typeof municipalitySchema>): Promise<Result> {

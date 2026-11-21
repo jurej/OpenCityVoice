@@ -341,6 +341,7 @@ export function NewReportWizard({ userId, municipality, categories, boundary }: 
           <LocationPicker
             value={position}
             boundary={boundary}
+            defaultStyle={municipality.default_map_style}
             onChange={(value) => {
               setPosition(value);
               setPositionSource((s) => (s === "default" ? "map" : s));
