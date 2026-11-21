@@ -18,7 +18,7 @@ async function staffContext(reportId: string) {
   if (!claims?.claims) return null;
   const { data: report } = await supabase
     .from("reports")
-    .select("id, number, title, description, municipality_id, author_id, status_id, municipalities(slug, name, primary_color, logo_path)")
+    .select("id, number, title, description, municipality_id, author_id, status_id, is_hidden, municipalities(slug, name, primary_color, logo_path)")
     .eq("id", reportId)
     .single();
   if (!report) return null;
@@ -86,7 +86,10 @@ async function notifyAuthor(
   note: string | null,
 ) {
   const admin = createAdminClient();
-  const { data: merged } = await admin.from("reports").select("author_id").eq("duplicate_of", report.id);
+  // Authors of merged duplicates only hear about the original while it is public.
+  const { data: merged } = report.is_hidden
+    ? { data: [] }
+    : await admin.from("reports").select("author_id").eq("duplicate_of", report.id);
   const authorIds = [...new Set([report.author_id, ...(merged ?? []).map((r) => r.author_id)])];
   const municipality = report.municipalities!;
   const title = report.title || report.description.slice(0, 80);
