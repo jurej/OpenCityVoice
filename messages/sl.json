@@ -100,7 +100,7 @@
     "official": "Občina",
     "timeline": "Potek",
     "location": "Lokacija",
-    "openInMaps": "Odpri v zemljevidih",
+    "showOnMap": "Prikaži na zemljevidu",
     "share": "Deli",
     "deleteComment": "Izbriši komentar",
     "notFound": "Ta pobuda ne obstaja.",
@@ -240,7 +240,8 @@
     "minVotes": "Glasovi",
     "anyVotes": "Poljubno število glasov",
     "minVotesOption": "{count}+ glasov",
-    "recentVotes": "+{count} v 7 dneh"
+    "recentVotes": "+{count} v 7 dneh",
+    "notifications": "Obvestila"
   },
   "team": {
     "title": "Ekipa in odgovorne osebe",
@@ -343,11 +344,36 @@
     "assignIntro": "Dodeljena vam je pobuda #{number} \"{title}\".",
     "openDashboard": "Odpri na nadzorni plošči",
     "memberApprovedSubject": "Dostop odobren: {municipality}",
-    "memberApprovedIntro": "Vaša zahteva za urejanje pobud ({municipality}) je odobrena."
+    "memberApprovedIntro": "Vaša zahteva za urejanje pobud ({municipality}) je odobrena.",
+    "newReportSubject": "{municipality}: nova pobuda #{number} ({category})",
+    "newReportIntro": "Oddana je nova pobuda v kategoriji {category}: \"{title}\".",
+    "newReportDescription": "Opis:",
+    "commentSubject": "{municipality}: nov komentar na pobudi #{number}",
+    "commentIntro": "{name} je komentiral/a pobudo #{number} \"{title}\", ki je dodeljena vam.",
+    "commentLabel": "Komentar:",
+    "someone": "Občan",
+    "staffFooter": "To e-pošto prejemate zaradi nastavitev obvestil v ekipi občine. Spremenite jih na {url}."
   },
   "notFound": {
     "title": "Stran ne obstaja",
     "text": "Strani, ki jo iščete, ni.",
     "home": "Na domačo stran"
+  },
+  "map": {
+    "style": "Prikaz zemljevida",
+    "map": "Zemljevid",
+    "detailed": "Podroben",
+    "satellite": "Satelitski"
+  },
+  "notifications": {
+    "title": "Obvestila",
+    "intro": "Izberite, katera e-poštna obvestila prejemate kot član ekipe ({municipality}).",
+    "newReports": "Nove pobude",
+    "newReportsText": "Prejmite e-pošto, ko je oddana pobuda v eni od izbranih kategorij.",
+    "selectAll": "Izberi vse",
+    "selectNone": "Počisti",
+    "comments": "Komentarji na mojih pobudah",
+    "commentsText": "Prejmite e-pošto, ko nekdo komentira pobudo, ki je dodeljena vam.",
+    "notMember": "Obvestila so na voljo potrjenim članom ekipe občine."
   }
 }

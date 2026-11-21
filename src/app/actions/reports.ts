@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { notifyAssigneeOfComment, notifyStaffOfNewReport } from "@/lib/notifications";
 
 async function requireClaims() {
   const supabase = await createClient();
@@ -40,6 +42,7 @@ export async function addComment(input: { reportId: string; body: string }, path
     .from("report_comments")
     .insert({ report_id: parsed.data.reportId, body: parsed.data.body, author_id: userId });
   if (error) return { ok: false as const };
+  after(() => notifyAssigneeOfComment(parsed.data.reportId, userId, parsed.data.body));
   revalidatePath(path);
   return { ok: true as const };
 }
@@ -99,13 +102,14 @@ export async function createReport(input: z.input<typeof createReportSchema>): P
       number: 0,
       status_id: "00000000-0000-0000-0000-000000000000",
     })
-    .select("number")
+    .select("id, number")
     .single();
   if (error || !report) {
     console.error("[createReport]", error);
     return { ok: false, error: "failed" };
   }
 
+  after(() => notifyStaffOfNewReport(report.id));
   revalidatePath(`/`, "layout");
   return { ok: true, number: report.number };
 }

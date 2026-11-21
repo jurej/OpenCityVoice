@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { maplibregl } from "./maplibre";
 import { type Map as MapLibreMap } from "maplibre-gl";
-import { mapStyleUrl } from "@/lib/config";
+import { useTranslations } from "next-intl";
+import { MapStyleControl, boundaryPaint, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
 
 type Props = {
   /** Initial and externally controlled position as [lat, lng]. */
@@ -20,6 +21,7 @@ export function LocationPicker({ value, zoom = 17, boundary, onChange, className
   const mapRef = useRef<MapLibreMap | null>(null);
   const onChangeRef = useRef(onChange);
   const lastEmitted = useRef<string>("");
+  const t = useTranslations("map");
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -27,23 +29,35 @@ export function LocationPicker({ value, zoom = 17, boundary, onChange, className
 
   useEffect(() => {
     if (!container.current) return;
+    let styleId: MapStyleId = storedMapStyle();
     const map = new maplibregl.Map({
       container: container.current,
-      style: mapStyleUrl,
+      style: mapStyle(styleId),
       center: [value[1], value[0]],
       zoom,
       attributionControl: { compact: true },
     });
     mapRef.current = map;
+    map.addControl(
+      new MapStyleControl(
+        { title: t("style"), map: t("map"), detailed: t("detailed"), satellite: t("satellite") },
+        styleId,
+        (id) => {
+          styleId = id;
+          map.setStyle(mapStyle(id), { diff: false });
+        },
+      ),
+      "bottom-right",
+    );
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
-    map.on("load", () => {
+    map.on("style.load", () => {
       if (!boundary) return;
       map.addSource("boundary", { type: "geojson", data: { type: "Feature", properties: {}, geometry: boundary } });
       map.addLayer({
         id: "boundary-line",
         type: "line",
         source: "boundary",
-        paint: { "line-color": "#57534e", "line-width": 1.5, "line-dasharray": [2, 2], "line-opacity": 0.6 },
+        paint: boundaryPaint(styleId),
       });
     });
     map.on("moveend", () => {

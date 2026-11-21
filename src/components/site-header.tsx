@@ -20,7 +20,7 @@ export async function SiteHeader({ municipality: municipalityProp, isStaff, next
   const t = await getTranslations("common");
   return (
     <header className={cn("sticky top-0 z-30 border-b bg-background/95 backdrop-blur", className)}>
-      <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4">
+      <div className="flex h-14 items-center gap-3 px-4">
         {singleMunicipality && municipality ? (
           <Link href={`/${municipality.slug}`} className="flex min-w-0 items-center gap-2 font-semibold tracking-tight">
             <MunicipalityLogo name={municipality.name} logoPath={municipality.logo_path} color={municipality.primary_color} />

@@ -60,6 +60,7 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
   );
 
   const selected = selectedId ? reports.find((r) => r.id === selectedId) : null;
+  const initialReport = initialSelected ? reports.find((r) => r.id === initialSelected) : undefined;
 
   function toggleCategory(id: string) {
     setActiveCategories((current) => (current.includes(id) ? current.filter((c) => c !== id) : [...current, id]));
@@ -136,8 +137,8 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
       <section className={cn("relative min-h-0 flex-1", mobileView === "list" && "hidden md:block")}>
         <ReportMap
           className="absolute inset-0 [&_.maplibregl-ctrl-bottom-right]:mb-[72px] md:[&_.maplibregl-ctrl-bottom-right]:mb-0"
-          center={[municipality.center_lat, municipality.center_lng]}
-          zoom={municipality.default_zoom}
+          center={initialReport ? [initialReport.lat, initialReport.lng] : [municipality.center_lat, municipality.center_lng]}
+          zoom={initialReport ? Math.max(municipality.default_zoom, 16) : municipality.default_zoom}
           pins={pins}
           boundary={boundary}
           selectedId={selectedId}
@@ -203,7 +204,7 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
           <button
             onClick={() => setActiveCategories([])}
             className={cn(
-              "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium",
+              "inline-flex h-7 shrink-0 items-center gap-1 rounded-full border px-3 text-xs font-medium",
               floating ? "bg-background shadow-sm" : "bg-muted",
             )}
           >
@@ -219,13 +220,23 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
               onClick={() => toggleCategory(c.id)}
               aria-pressed={active}
               className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
-                active ? "border-foreground bg-foreground text-background" : "bg-background hover:bg-muted",
-                floating && !active && "shadow-sm",
+                "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border pr-3 pl-1 text-xs font-medium whitespace-nowrap transition-colors",
+                active ? "" : "bg-background hover:bg-muted",
+                floating && "shadow-sm",
               )}
+              style={
+                active
+                  ? { borderColor: c.color, backgroundColor: `color-mix(in oklch, ${c.color} 14%, white)` }
+                  : undefined
+              }
             >
-              <CategoryIcon name={c.icon} className="size-3.5" />
-              <span style={active ? undefined : { color: "inherit" }}>{localized(c.name, locale)}</span>
+              <span
+                className="flex size-5 shrink-0 items-center justify-center rounded-full"
+                style={{ backgroundColor: c.color }}
+              >
+                <CategoryIcon name={c.icon} className="size-3 text-white" />
+              </span>
+              {localized(c.name, locale)}
             </button>
           );
         })}

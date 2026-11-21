@@ -77,6 +77,7 @@ export default async function ReportPage({ params }: Params) {
   const status = statuses.find((s) => s.id === report.status_id)!;
   const statusById = new Map(statuses.map((s) => [s.id, s]));
   const path = `/${slug}/reports/${report.number}`;
+  const mapHref = `/${slug}?report=${report.id}`;
   const publicEvents = (events ?? []).filter((e) => e.type === "created" || e.type === "status_changed");
 
   return (
@@ -84,7 +85,7 @@ export default async function ReportPage({ params }: Params) {
       <SiteHeader municipality={municipality} isStaff={access.isStaff} next={path} />
       <main className="mx-auto max-w-5xl px-4 pt-4 pb-16 sm:pt-6">
         <Link
-          href={`/${slug}?report=${report.id}`}
+          href={mapHref}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
@@ -148,27 +149,24 @@ export default async function ReportPage({ params }: Params) {
 
           <aside className="space-y-6">
             <section className="overflow-hidden rounded-xl border">
-              <ReportMap
-                className="h-48 w-full"
-                center={[report.lat, report.lng]}
-                zoom={16}
-                interactive={false}
-                pins={[{ id: report.id, lat: report.lat, lng: report.lng, color: category.color }]}
-              />
+              <Link href={mapHref} aria-label={t("showOnMap")} className="block">
+                <ReportMap
+                  className="pointer-events-none h-48 w-full"
+                  center={[report.lat, report.lng]}
+                  zoom={16}
+                  interactive={false}
+                  pins={[{ id: report.id, lat: report.lat, lng: report.lng, color: category.color }]}
+                />
+              </Link>
               <div className="flex items-start gap-2 p-3 text-sm">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="text-muted-foreground">
                     {report.address || `${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`}
                   </p>
-                  <a
-                    href={`https://www.openstreetmap.org/?mlat=${report.lat}&mlon=${report.lng}#map=18/${report.lat}/${report.lng}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-1 inline-block font-medium underline-offset-4 hover:underline"
-                  >
-                    {t("openInMaps")}
-                  </a>
+                  <Link href={mapHref} className="mt-1 inline-block font-medium underline-offset-4 hover:underline">
+                    {t("showOnMap")}
+                  </Link>
                 </div>
               </div>
             </section>

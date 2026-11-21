@@ -114,7 +114,7 @@ export function Dashboard(props: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="border-b bg-muted/30">
-        <div className="mx-auto flex max-w-screen-2xl flex-wrap items-end gap-2 px-4 py-3">
+        <div className="flex flex-wrap items-end gap-2 px-4 py-3">
           <div className="relative w-full sm:w-56">
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={filters.q} onChange={(e) => set({ q: e.target.value })} placeholder={t("search")} className="h-9 bg-background pl-8" />

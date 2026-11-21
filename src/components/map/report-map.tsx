@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { maplibregl } from "./maplibre";
 import type { GeoJSONSource, MapLayerMouseEvent, MapMouseEvent, Map as MapLibreMap } from "maplibre-gl";
-import { mapStyleUrl } from "@/lib/config";
+import { useTranslations } from "next-intl";
+import { MapStyleControl, boundaryPaint, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
 
 export type MapPin = { id: string; lat: number; lng: number; color: string; closed?: boolean };
 
@@ -36,17 +37,21 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
   const loaded = useRef(false);
   const onSelectRef = useRef(onSelect);
   const pinsRef = useRef(pins);
+  const selectedRef = useRef(selectedId);
+  const t = useTranslations("map");
 
   useEffect(() => {
     onSelectRef.current = onSelect;
     pinsRef.current = pins;
+    selectedRef.current = selectedId;
   });
 
   useEffect(() => {
     if (!container.current) return;
+    let styleId: MapStyleId = interactive ? storedMapStyle() : "map";
     const map = new maplibregl.Map({
       container: container.current,
-      style: mapStyleUrl,
+      style: mapStyle(styleId),
       center: [center[1], center[0]],
       zoom,
       attributionControl: { compact: true },
@@ -55,6 +60,17 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
     });
     mapRef.current = map;
     if (interactive) {
+      map.addControl(
+        new MapStyleControl(
+          { title: t("style"), map: t("map"), detailed: t("detailed"), satellite: t("satellite") },
+          styleId,
+          (id) => {
+            styleId = id;
+            map.setStyle(mapStyle(id), { diff: false });
+          },
+        ),
+        "bottom-right",
+      );
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
       map.addControl(
         new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }),
@@ -62,8 +78,8 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
       );
     }
 
-    map.on("load", () => {
-      loaded.current = true;
+    // Runs on the first load and after every base style switch, which drops the app's own layers.
+    map.on("style.load", () => {
       map.addSource("boundary", {
         type: "geojson",
         data: boundary ? { type: "Feature", properties: {}, geometry: boundary } : { type: "FeatureCollection", features: [] },
@@ -72,7 +88,7 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
         id: "boundary-line",
         type: "line",
         source: "boundary",
-        paint: { "line-color": "#57534e", "line-width": 1.5, "line-dasharray": [2, 2], "line-opacity": 0.6 },
+        paint: boundaryPaint(styleId),
       });
 
       map.addSource("reports", {
@@ -117,6 +133,11 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
         },
       });
 
+      loaded.current = true;
+      if (selectedRef.current) map.setFeatureState({ source: "reports", id: selectedRef.current }, { selected: true });
+    });
+
+    map.on("load", () => {
       if (!interactive) return;
       map.on("click", "pins", (e: MapLayerMouseEvent) => {
         const id = e.features?.[0]?.properties?.id as string | undefined;
@@ -160,6 +181,7 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
     const map = mapRef.current;
     if (!map || !selectedId) return;
     const apply = () => {
+      if (!map.getSource("reports")) return;
       map.setFeatureState({ source: "reports", id: selectedId }, { selected: true });
       const pin = pinsRef.current.find((p) => p.id === selectedId);
       if (pin && !map.getBounds().contains([pin.lng, pin.lat])) map.easeTo({ center: [pin.lng, pin.lat] });

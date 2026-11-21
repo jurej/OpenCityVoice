@@ -8,7 +8,7 @@ export function ManageNav({ links }: { links: { href: string; label: string }[] 
   const pathname = usePathname();
   return (
     <nav className="border-b bg-background">
-      <div className="mx-auto flex max-w-screen-2xl gap-1 overflow-x-auto px-2">
+      <div className="flex gap-1 overflow-x-auto px-2">
         {links.map((link) => {
           const active = pathname === link.href;
           return (

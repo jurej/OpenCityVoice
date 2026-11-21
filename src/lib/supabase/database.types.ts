@@ -143,6 +143,8 @@ export type Database = {
           created_at: string;
           job_title: string | null;
           municipality_id: string;
+          notify_category_ids: string[];
+          notify_comments: boolean;
           role: Database["public"]["Enums"]["member_role"];
           status: Database["public"]["Enums"]["member_status"];
           user_id: string;
@@ -152,6 +154,8 @@ export type Database = {
           created_at?: string;
           job_title?: string | null;
           municipality_id: string;
+          notify_category_ids?: string[];
+          notify_comments?: boolean;
           role?: Database["public"]["Enums"]["member_role"];
           status?: Database["public"]["Enums"]["member_status"];
           user_id: string;
@@ -160,6 +164,8 @@ export type Database = {
           created_at?: string;
           job_title?: string | null;
           municipality_id?: string;
+          notify_category_ids?: string[];
+          notify_comments?: boolean;
           role?: Database["public"]["Enums"]["member_role"];
           status?: Database["public"]["Enums"]["member_status"];
           user_id?: string;
@@ -628,6 +634,14 @@ export type Database = {
       };
       set_municipality_boundary: {
         Args: { p_geojson: Json; p_municipality_id: string };
+        Returns: undefined;
+      };
+      set_notification_preferences: {
+        Args: {
+          p_category_ids: string[];
+          p_comments: boolean;
+          p_municipality_id: string;
+        };
         Returns: undefined;
       };
       user_emails: {
