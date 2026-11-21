@@ -140,13 +140,15 @@ export default async function ReportPage({ params }: Params) {
             <p className="mt-6 leading-relaxed whitespace-pre-line">{report.description}</p>
 
             <div className="mt-6 flex flex-wrap items-center gap-2">
-              <VoteButton
-                reportId={report.id}
-                count={report.vote_count}
-                voted={Boolean(vote)}
-                signedIn={Boolean(user)}
-                path={path}
-              />
+              {!original && (
+                <VoteButton
+                  reportId={report.id}
+                  count={report.vote_count}
+                  voted={Boolean(vote)}
+                  signedIn={Boolean(user)}
+                  path={path}
+                />
+              )}
               <div className="ml-auto">
                 {access.isStaff ? (
                   <HideReportButton reportId={report.id} hidden={report.is_hidden} />
