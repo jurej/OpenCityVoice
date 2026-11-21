@@ -1,7 +1,7 @@
 -- Database tests (pgTAP). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(20);
 
 -- Seed ids
 \set lj '\'10000000-0000-4000-8000-000000000001\''
@@ -103,6 +103,26 @@ select throws_ok(
   format('update public.reports set status_id = %L where description = %L',
     (select id from public.statuses where municipality_id <> :lj limit 1), 'Broken bench in the park'),
   'P0001', 'Invalid status', 'staff cannot use statuses of another municipality');
+
+-- Staff notification preferences
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :staff, 'role', 'authenticated')::text, true);
+select public.set_notification_preferences(:lj, array[(select category_id from ctx), gen_random_uuid()], false);
+reset role;
+select is(
+  (select notify_category_ids from public.municipality_members where municipality_id = :lj and user_id = :staff),
+  array[(select category_id from ctx)],
+  'staff follow only existing categories of their municipality');
+select is(
+  (select notify_comments from public.municipality_members where municipality_id = :lj and user_id = :staff),
+  false,
+  'staff can turn off comment notifications');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :pending, 'role', 'authenticated')::text, true);
+select throws_ok(
+  format('select public.set_notification_preferences(%L, %L::uuid[], true)', :lj, '{}'),
+  'P0001', 'Not allowed', 'pending members cannot set notification preferences');
+reset role;
 
 select * from finish();
 rollback;

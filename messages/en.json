@@ -100,7 +100,7 @@
     "official": "Municipality",
     "timeline": "Progress",
     "location": "Location",
-    "openInMaps": "Open in maps",
+    "showOnMap": "Show on map",
     "share": "Share",
     "deleteComment": "Delete comment",
     "notFound": "This report does not exist.",
@@ -240,7 +240,8 @@
     "minVotes": "Votes",
     "anyVotes": "Any number of votes",
     "minVotesOption": "{count}+ votes",
-    "recentVotes": "+{count} in 7 days"
+    "recentVotes": "+{count} in 7 days",
+    "notifications": "Notifications"
   },
   "team": {
     "title": "Team and responsible people",
@@ -343,11 +344,36 @@
     "assignIntro": "Report #{number} \"{title}\" was assigned to you.",
     "openDashboard": "Open in dashboard",
     "memberApprovedSubject": "Access to {municipality} approved",
-    "memberApprovedIntro": "Your request to manage reports in {municipality} was approved."
+    "memberApprovedIntro": "Your request to manage reports in {municipality} was approved.",
+    "newReportSubject": "{municipality}: new report #{number} ({category})",
+    "newReportIntro": "A new report was submitted in {category}: \"{title}\".",
+    "newReportDescription": "Description:",
+    "commentSubject": "{municipality}: new comment on report #{number}",
+    "commentIntro": "{name} commented on report #{number} \"{title}\", which is assigned to you.",
+    "commentLabel": "Comment:",
+    "someone": "A citizen",
+    "staffFooter": "You receive this e-mail because of your notification settings in the municipality team. Change them at {url}."
   },
   "notFound": {
     "title": "Page not found",
     "text": "The page you are looking for does not exist.",
     "home": "Go to the home page"
+  },
+  "map": {
+    "style": "Map style",
+    "map": "Map",
+    "detailed": "Detailed",
+    "satellite": "Satellite"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "intro": "Choose which e-mails you receive as a member of the {municipality} team.",
+    "newReports": "New reports",
+    "newReportsText": "Get an e-mail when a report is submitted in one of the selected categories.",
+    "selectAll": "Select all",
+    "selectNone": "Clear",
+    "comments": "Comments on my reports",
+    "commentsText": "Get an e-mail when someone comments on a report assigned to you.",
+    "notMember": "Notifications are available to approved members of the municipality team."
   }
 }
