@@ -20,7 +20,8 @@ const connectSources = [
   "https://tiles.openfreemap.org",
   "https://server.arcgisonline.com",
   "https://nominatim.openstreetmap.org",
-  origin(process.env.NEXT_PUBLIC_MAP_STYLE_URL),
+  // A custom style can load tiles, sprites and glyphs from any host.
+  process.env.NEXT_PUBLIC_MAP_STYLE_URL ? "https:" : "",
   origin(process.env.NEXT_PUBLIC_SATELLITE_TILES_URL),
   "https://vercel.live",
   "wss://ws-us3.pusher.com",
