@@ -21,15 +21,45 @@ from public, anon, authenticated;
 revoke execute on function public.set_municipality_boundary(uuid, jsonb) from public, anon;
 grant execute on function public.set_municipality_boundary(uuid, jsonb) to authenticated;
 
--- Per-user rate limits for content created through the API (seeds and the service role are exempt). Timestamps are set by the server
--- so they cannot be backdated to evade limits or skew "trending" sorting.
-create index report_comments_author_created_idx on public.report_comments (author_id, created_at);
-drop index public.reports_author_idx;
-create index reports_author_created_idx on public.reports (author_id, created_at);
+-- Per-user rate limits for content created through the API (seeds and the service role are exempt).
+-- Creations are logged separately so deleting content does not free up quota, and a per-user
+-- advisory lock serialises concurrent inserts. Timestamps are set by the server so rows cannot be
+-- backdated to skew "trending" sorting.
+create table public.rate_limit_events (
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  kind text not null,
+  created_at timestamptz not null default now()
+);
+create index rate_limit_events_user_idx on public.rate_limit_events (user_id, kind, created_at);
+alter table public.rate_limit_events enable row level security;
+
+create function public.consume_rate_limit(p_kind text, p_limits jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user uuid := auth.uid();
+  v_limit record;
+begin
+  perform pg_advisory_xact_lock(hashtextextended(v_user::text || p_kind, 0));
+  for v_limit in select key::interval as period, value::int as max from jsonb_each_text(p_limits) loop
+    if (select count(*) from public.rate_limit_events
+         where user_id = v_user and kind = p_kind and created_at > now() - v_limit.period) >= v_limit.max then
+      raise exception 'rate_limited';
+    end if;
+  end loop;
+  insert into public.rate_limit_events (user_id, kind) values (v_user, p_kind);
+  delete from public.rate_limit_events
+   where user_id = v_user and kind = p_kind and created_at < now() - interval '1 day';
+end;
+$$;
 
 create function public.limit_report_rate()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
@@ -38,14 +68,7 @@ begin
   end if;
   new.created_at := now();
   new.updated_at := now();
-  if (
-       (select count(*) from public.reports
-         where author_id = auth.uid() and created_at > now() - interval '1 hour') >= 10
-    or (select count(*) from public.reports
-         where author_id = auth.uid() and created_at > now() - interval '1 day') >= 30
-  ) then
-    raise exception 'rate_limited';
-  end if;
+  perform public.consume_rate_limit('report', '{"1 hour": 10, "1 day": 30}');
   return new;
 end;
 $$;
@@ -57,6 +80,7 @@ create trigger limit_report_rate
 create function public.limit_comment_rate()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
@@ -64,14 +88,7 @@ begin
     return new;
   end if;
   new.created_at := now();
-  if (
-       (select count(*) from public.report_comments
-         where author_id = auth.uid() and created_at > now() - interval '10 minutes') >= 20
-    or (select count(*) from public.report_comments
-         where author_id = auth.uid() and created_at > now() - interval '1 day') >= 200
-  ) then
-    raise exception 'rate_limited';
-  end if;
+  perform public.consume_rate_limit('comment', '{"10 minutes": 20, "1 day": 200}');
   return new;
 end;
 $$;
@@ -97,5 +114,9 @@ create trigger set_vote_created_at
   before insert on public.report_votes
   for each row execute function public.set_vote_created_at();
 
-revoke execute on function public.limit_report_rate(), public.limit_comment_rate(), public.set_vote_created_at()
+revoke execute on function
+  public.limit_report_rate(),
+  public.limit_comment_rate(),
+  public.set_vote_created_at(),
+  public.consume_rate_limit(text, jsonb)
 from public, anon, authenticated;
