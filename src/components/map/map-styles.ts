@@ -60,7 +60,12 @@ export function boundaryPaint(id: MapStyleId) {
 
 export function storedMapStyle(): MapStyleId {
   if (typeof window === "undefined") return "map";
-  const value = window.localStorage.getItem(STORAGE_KEY);
+  let value: string | null = null;
+  try {
+    value = window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    // Storage can be blocked by browser settings.
+  }
   return (mapStyleIds as readonly string[]).includes(value ?? "") ? (value as MapStyleId) : "map";
 }
 
@@ -127,7 +132,11 @@ export class MapStyleControl implements IControl {
   private select(id: MapStyleId) {
     if (id === this.current) return;
     this.current = id;
-    window.localStorage.setItem(STORAGE_KEY, id);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, id);
+    } catch {
+      // Storage can be blocked by browser settings; the choice then lasts for this page only.
+    }
     this.render();
     this.onChange(id);
   }
