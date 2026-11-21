@@ -69,6 +69,9 @@ begin
   if v_duplicate.id is null or not public.is_municipality_staff(v_duplicate.municipality_id) then
     raise exception 'Not allowed';
   end if;
+  if v_duplicate.duplicate_of is not null then
+    raise exception 'Already merged';
+  end if;
 
   select * into v_target from public.reports
    where municipality_id = v_duplicate.municipality_id and number = p_target_number;
@@ -79,7 +82,9 @@ begin
   select id into v_status from public.statuses
    where municipality_id = v_duplicate.municipality_id and is_duplicate;
   if v_status is null then
-    raise exception 'Municipality has no duplicate status';
+    insert into public.statuses (municipality_id, name, color, sort_order, is_initial, is_closed, is_duplicate)
+    values (v_duplicate.municipality_id, '{"en": "Duplicate", "sl": "Podvojena"}', '#78716c', 50, false, true, true)
+    returning id into v_status;
   end if;
 
   insert into public.report_votes (report_id, user_id)
@@ -93,6 +98,30 @@ begin
   return v_target.number;
 end;
 $$;
+
+-- Only merge_report links duplicates: new reports start unlinked, and a report leaves its merge
+-- when staff move it to a status other than "Duplicate".
+create function public.sync_duplicate_of()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if tg_op = 'INSERT' then
+    new.duplicate_of := null;
+  elsif new.status_id is distinct from old.status_id
+     and not exists (select 1 from public.statuses where id = new.status_id and is_duplicate) then
+    new.duplicate_of := null;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger sync_duplicate_of
+  before insert or update on public.reports
+  for each row execute function public.sync_duplicate_of();
+
+revoke execute on function public.sync_duplicate_of() from public, anon, authenticated;
 
 revoke execute on function public.merge_report(uuid, integer) from public, anon;
 grant execute on function public.merge_report(uuid, integer) to authenticated;
