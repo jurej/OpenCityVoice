@@ -1,10 +1,13 @@
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Camera, MapPin, BellRing } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { createClient } from "@/lib/supabase/server";
+import { singleMunicipality } from "@/lib/config";
 import { MunicipalityPicker } from "./municipality-picker";
 
 export default async function HomePage() {
+  if (singleMunicipality) redirect(`/${singleMunicipality}`);
   const t = await getTranslations("home");
   const tc = await getTranslations("common");
   const supabase = await createClient();
