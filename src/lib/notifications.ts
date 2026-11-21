@@ -5,10 +5,7 @@ import { emailBrand, sendEmail } from "@/lib/email";
 import { localized } from "@/i18n/config";
 import { siteUrl } from "@/lib/config";
 
-async function recipient(
-  admin: ReturnType<typeof createAdminClient>,
-  userId: string,
-) {
+async function recipient(admin: ReturnType<typeof createAdminClient>, userId: string) {
   const [{ data: user }, { data: profile }] = await Promise.all([
     admin.auth.admin.getUserById(userId),
     admin.from("profiles").select("locale").eq("id", userId).single(),
@@ -75,11 +72,7 @@ export async function notifyStaffOfNewReport(reportId: string) {
 }
 
 /** E-mails the assignee of a report about a new comment, unless they wrote it or opted out. */
-export async function notifyAssigneeOfComment(
-  reportId: string,
-  commenterId: string,
-  body: string,
-) {
+export async function notifyAssigneeOfComment(reportId: string, commenterId: string, body: string) {
   const admin = createAdminClient();
   const { data: report } = await admin
     .from("reports")
@@ -88,12 +81,7 @@ export async function notifyAssigneeOfComment(
     )
     .eq("id", reportId)
     .single();
-  if (
-    !report?.assignee_id ||
-    report.assignee_id === commenterId ||
-    !report.municipalities
-  )
-    return;
+  if (!report?.assignee_id || report.assignee_id === commenterId || !report.municipalities) return;
 
   const [{ data: member }, { data: commenter }] = await Promise.all([
     admin

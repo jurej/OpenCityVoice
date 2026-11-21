@@ -4,13 +4,7 @@ import { useEffect, useRef } from "react";
 import { maplibregl } from "./maplibre";
 import { type Map as MapLibreMap } from "maplibre-gl";
 import { useTranslations } from "next-intl";
-import {
-  MapStyleControl,
-  boundaryPaint,
-  mapStyle,
-  storedMapStyle,
-  type MapStyleId,
-} from "./map-styles";
+import { MapStyleControl, boundaryPaint, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
 
 type Props = {
   /** Initial and externally controlled position as [lat, lng]. */
@@ -22,13 +16,7 @@ type Props = {
 };
 
 /** Map with a fixed pin in the center: the user pans the map to place the pin. */
-export function LocationPicker({
-  value,
-  zoom = 17,
-  boundary,
-  onChange,
-  className,
-}: Props) {
+export function LocationPicker({ value, zoom = 17, boundary, onChange, className }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onChangeRef = useRef(onChange);
@@ -52,12 +40,7 @@ export function LocationPicker({
     mapRef.current = map;
     map.addControl(
       new MapStyleControl(
-        {
-          title: t("style"),
-          map: t("map"),
-          detailed: t("detailed"),
-          satellite: t("satellite"),
-        },
+        { title: t("style"), map: t("map"), detailed: t("detailed"), satellite: t("satellite") },
         styleId,
         (id) => {
           styleId = id;
@@ -66,16 +49,10 @@ export function LocationPicker({
       ),
       "bottom-right",
     );
-    map.addControl(
-      new maplibregl.NavigationControl({ showCompass: false }),
-      "bottom-right",
-    );
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     map.on("style.load", () => {
       if (!boundary) return;
-      map.addSource("boundary", {
-        type: "geojson",
-        data: { type: "Feature", properties: {}, geometry: boundary },
-      });
+      map.addSource("boundary", { type: "geojson", data: { type: "Feature", properties: {}, geometry: boundary } });
       map.addLayer({
         id: "boundary-line",
         type: "line",
@@ -85,10 +62,7 @@ export function LocationPicker({
     });
     map.on("moveend", () => {
       const c = map.getCenter();
-      const next: [number, number] = [
-        Number(c.lat.toFixed(7)),
-        Number(c.lng.toFixed(7)),
-      ];
+      const next: [number, number] = [Number(c.lat.toFixed(7)), Number(c.lng.toFixed(7))];
       lastEmitted.current = next.join(",");
       onChangeRef.current(next);
     });
@@ -102,10 +76,7 @@ export function LocationPicker({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || value.join(",") === lastEmitted.current) return;
-    map.jumpTo({
-      center: [value[1], value[0]],
-      zoom: Math.max(map.getZoom(), 16),
-    });
+    map.jumpTo({ center: [value[1], value[0]], zoom: Math.max(map.getZoom(), 16) });
   }, [value]);
 
   return (
@@ -114,13 +85,7 @@ export function LocationPicker({
         <div ref={container} className="size-full" />
       </div>
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-        <svg
-          width="36"
-          height="46"
-          viewBox="0 0 36 46"
-          aria-hidden="true"
-          className="drop-shadow-md"
-        >
+        <svg width="36" height="46" viewBox="0 0 36 46" aria-hidden="true" className="drop-shadow-md">
           <path
             d="M18 1C8.6 1 1 8.6 1 18c0 12 15 25.5 15.7 26.1a2 2 0 0 0 2.6 0C20 43.5 35 30 35 18 35 8.6 27.4 1 18 1Z"
             className="fill-primary stroke-white"

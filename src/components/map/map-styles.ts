@@ -61,9 +61,7 @@ export function boundaryPaint(id: MapStyleId) {
 export function storedMapStyle(): MapStyleId {
   if (typeof window === "undefined") return "map";
   const value = window.localStorage.getItem(STORAGE_KEY);
-  return (mapStyleIds as readonly string[]).includes(value ?? "")
-    ? (value as MapStyleId)
-    : "map";
+  return (mapStyleIds as readonly string[]).includes(value ?? "") ? (value as MapStyleId) : "map";
 }
 
 const layersIcon =
@@ -85,8 +83,7 @@ export class MapStyleControl implements IControl {
 
   onAdd() {
     const container = document.createElement("div");
-    container.className =
-      "maplibregl-ctrl maplibregl-ctrl-group ocv-style-control";
+    container.className = "maplibregl-ctrl maplibregl-ctrl-group ocv-style-control";
 
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -95,9 +92,7 @@ export class MapStyleControl implements IControl {
     toggle.setAttribute("aria-haspopup", "true");
     toggle.innerHTML = layersIcon;
     toggle.className = "ocv-style-toggle";
-    toggle.addEventListener("click", () =>
-      this.setOpen(this.menu?.hidden ?? true),
-    );
+    toggle.addEventListener("click", () => this.setOpen(this.menu?.hidden ?? true));
 
     const menu = document.createElement("div");
     menu.className = "ocv-style-menu";
@@ -142,13 +137,8 @@ export class MapStyleControl implements IControl {
   }
 
   private render() {
-    this.menu
-      ?.querySelectorAll<HTMLButtonElement>("button")
-      .forEach((button) => {
-        button.setAttribute(
-          "aria-checked",
-          String(button.dataset.style === this.current),
-        );
-      });
+    this.menu?.querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
+      button.setAttribute("aria-checked", String(button.dataset.style === this.current));
+    });
   }
 }

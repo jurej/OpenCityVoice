@@ -17,10 +17,7 @@ export async function updateProfile(input: z.input<typeof schema>) {
   if (!data?.claims) return { ok: false as const };
   const { error } = await supabase
     .from("profiles")
-    .update({
-      full_name: parsed.data.fullName || null,
-      email_notifications: parsed.data.emailNotifications,
-    })
+    .update({ full_name: parsed.data.fullName || null, email_notifications: parsed.data.emailNotifications })
     .eq("id", data.claims.sub);
   if (error) return { ok: false as const };
   revalidatePath("/", "layout");
@@ -33,9 +30,7 @@ const preferencesSchema = z.object({
   comments: z.boolean(),
 });
 
-export async function updateNotificationPreferences(
-  input: z.input<typeof preferencesSchema>,
-) {
+export async function updateNotificationPreferences(input: z.input<typeof preferencesSchema>) {
   const parsed = preferencesSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const };
   const supabase = await createClient();

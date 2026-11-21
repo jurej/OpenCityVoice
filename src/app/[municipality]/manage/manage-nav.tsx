@@ -4,11 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function ManageNav({
-  links,
-}: {
-  links: { href: string; label: string }[];
-}) {
+export function ManageNav({ links }: { links: { href: string; label: string }[] }) {
   const pathname = usePathname();
   return (
     <nav className="border-b bg-background">
@@ -21,8 +17,7 @@ export function ManageNav({
               href={link.href}
               className={cn(
                 "relative px-3 py-2.5 text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground",
-                active &&
-                  "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-foreground",
+                active && "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-foreground",
               )}
             >
               {link.label}

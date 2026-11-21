@@ -17,12 +17,7 @@ type Props = {
   comments: boolean;
 };
 
-export function NotificationsForm({
-  municipalityId,
-  categories,
-  categoryIds,
-  comments,
-}: Props) {
+export function NotificationsForm({ municipalityId, categories, categoryIds, comments }: Props) {
   const t = useTranslations("notifications");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -59,18 +54,11 @@ export function NotificationsForm({
         <div className="flex items-start justify-between gap-4 p-4 sm:p-5">
           <div>
             <h2 className="text-sm font-semibold">{t("newReports")}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("newReportsText")}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("newReportsText")}</p>
           </div>
           <button
             type="button"
-            onClick={() =>
-              save(
-                allSelected ? new Set() : new Set(categories.map((c) => c.id)),
-                notifyComments,
-              )
-            }
+            onClick={() => save(allSelected ? new Set() : new Set(categories.map((c) => c.id)), notifyComments)}
             className="shrink-0 text-sm font-medium underline-offset-4 hover:underline"
           >
             {allSelected ? t("selectNone") : t("selectAll")}
@@ -87,10 +75,7 @@ export function NotificationsForm({
                   <CategoryIcon name={c.icon} className="size-3.5 text-white" />
                 </span>
                 <span className="flex-1">{localized(c.name, locale)}</span>
-                <Checkbox
-                  checked={selected.has(c.id)}
-                  onCheckedChange={(checked) => toggle(c.id, checked === true)}
-                />
+                <Checkbox checked={selected.has(c.id)} onCheckedChange={(checked) => toggle(c.id, checked === true)} />
               </label>
             </li>
           ))}
@@ -100,15 +85,9 @@ export function NotificationsForm({
       <section className="flex items-start justify-between gap-4 rounded-xl border p-4 sm:p-5">
         <div>
           <Label htmlFor="notify-comments">{t("comments")}</Label>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("commentsText")}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("commentsText")}</p>
         </div>
-        <Switch
-          id="notify-comments"
-          checked={notifyComments}
-          onCheckedChange={(value) => save(selected, value)}
-        />
+        <Switch id="notify-comments" checked={notifyComments} onCheckedChange={(value) => save(selected, value)} />
       </section>
     </div>
   );

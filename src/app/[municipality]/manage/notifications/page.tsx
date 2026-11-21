@@ -8,9 +8,7 @@ export async function generateMetadata() {
   return { title: t("title") };
 }
 
-export default async function NotificationsPage({
-  params,
-}: PageProps<"/[municipality]/manage/notifications">) {
+export default async function NotificationsPage({ params }: PageProps<"/[municipality]/manage/notifications">) {
   const { municipality: slug } = await params;
   const municipality = await getMunicipality(slug);
   const access = await getAccess(municipality.id);
@@ -32,9 +30,7 @@ export default async function NotificationsPage({
       <div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
         <header>
           <h1 className="text-xl font-semibold">{t("title")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("intro", { municipality: municipality.name })}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("intro", { municipality: municipality.name })}</p>
         </header>
         {member ? (
           <NotificationsForm
@@ -51,9 +47,7 @@ export default async function NotificationsPage({
             comments={member.notify_comments}
           />
         ) : (
-          <p className="rounded-xl border p-4 text-sm text-muted-foreground">
-            {t("notMember")}
-          </p>
+          <p className="rounded-xl border p-4 text-sm text-muted-foreground">{t("notMember")}</p>
         )}
       </div>
     </div>

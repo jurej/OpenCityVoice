@@ -3,15 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ChevronRight,
-  List,
-  Map as MapIcon,
-  MessageSquare,
-  Plus,
-  ThumbsUp,
-  X,
-} from "lucide-react";
+import { ChevronRight, List, Map as MapIcon, MessageSquare, Plus, ThumbsUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportMap, type MapPin } from "@/components/map/report-map";
 import { CategoryLabel, StatusBadge, TimeAgo } from "@/components/report-bits";
@@ -20,12 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { localized } from "@/i18n/config";
 import { photoUrl } from "@/lib/config";
 import { cn } from "@/lib/utils";
-import type {
-  Category,
-  PublicMunicipality,
-  ReportListItem,
-  Status,
-} from "@/lib/types";
+import type { Category, PublicMunicipality, ReportListItem, Status } from "@/lib/types";
 
 type Props = {
   municipality: PublicMunicipality;
@@ -36,14 +23,7 @@ type Props = {
   initialSelected: string | null;
 };
 
-export function ExplorerView({
-  municipality,
-  categories,
-  statuses,
-  reports,
-  boundary,
-  initialSelected,
-}: Props) {
+export function ExplorerView({ municipality, categories, statuses, reports, boundary, initialSelected }: Props) {
   const t = useTranslations("explorer");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -53,21 +33,14 @@ export function ExplorerView({
   const [selectedId, setSelectedId] = useState<string | null>(initialSelected);
   const [mobileView, setMobileView] = useState<"map" | "list">("map");
 
-  const categoryById = useMemo(
-    () => new Map(categories.map((c) => [c.id, c])),
-    [categories],
-  );
-  const statusById = useMemo(
-    () => new Map(statuses.map((s) => [s.id, s])),
-    [statuses],
-  );
+  const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const statusById = useMemo(() => new Map(statuses.map((s) => [s.id, s])), [statuses]);
 
   const visible = useMemo(() => {
     const list = reports.filter(
       (r) =>
         categoryById.has(r.category_id) &&
-        (activeCategories.length === 0 ||
-          activeCategories.includes(r.category_id)) &&
+        (activeCategories.length === 0 || activeCategories.includes(r.category_id)) &&
         (!openOnly || !statusById.get(r.status_id)?.is_closed),
     );
     if (sort === "votes") list.sort((a, b) => b.vote_count - a.vote_count);
@@ -87,18 +60,13 @@ export function ExplorerView({
   );
 
   const selected = selectedId ? reports.find((r) => r.id === selectedId) : null;
-  const [initialReport] = useState(() =>
-    initialSelected ? reports.find((r) => r.id === initialSelected) : undefined,
-  );
+  const initialReport = initialSelected ? reports.find((r) => r.id === initialSelected) : undefined;
 
   function toggleCategory(id: string) {
-    setActiveCategories((current) =>
-      current.includes(id) ? current.filter((c) => c !== id) : [...current, id],
-    );
+    setActiveCategories((current) => (current.includes(id) ? current.filter((c) => c !== id) : [...current, id]));
   }
 
-  const reportLink = (r: ReportListItem) =>
-    `/${municipality.slug}/reports/${r.number}`;
+  const reportLink = (r: ReportListItem) => `/${municipality.slug}/reports/${r.number}`;
 
   return (
     <div className="relative flex min-h-0 flex-1">
@@ -111,18 +79,15 @@ export function ExplorerView({
       >
         {renderFilters()}
         <div className="flex items-center justify-between border-b px-4 py-2 text-xs text-muted-foreground">
-          <span>{t("reports", { count: visible.length })}</span>
+          <span>
+            {t("reports", { count: visible.length })}
+          </span>
           <div className="flex gap-1">
             {(["newest", "votes"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setSort(s)}
-                className={cn(
-                  "rounded px-2 py-1",
-                  sort === s
-                    ? "bg-muted font-medium text-foreground"
-                    : "hover:text-foreground",
-                )}
+                className={cn("rounded px-2 py-1", sort === s ? "bg-muted font-medium text-foreground" : "hover:text-foreground")}
               >
                 {s === "newest" ? t("sortNewest") : t("sortVotes")}
               </button>
@@ -138,31 +103,15 @@ export function ExplorerView({
                 <Link
                   href={reportLink(r)}
                   onMouseEnter={() => setSelectedId(r.id)}
-                  className={cn(
-                    "flex gap-3 px-4 py-3.5 hover:bg-muted/60",
-                    selectedId === r.id && "md:bg-muted/60",
-                  )}
+                  className={cn("flex gap-3 px-4 py-3.5 hover:bg-muted/60", selectedId === r.id && "md:bg-muted/60")}
                 >
                   <ReportThumb report={r} category={category} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="line-clamp-1 font-medium">
-                        {r.title || r.description}
-                      </p>
-                      {status && (
-                        <StatusBadge
-                          name={status.name}
-                          color={status.color}
-                          className="shrink-0"
-                        />
-                      )}
+                      <p className="line-clamp-1 font-medium">{r.title || r.description}</p>
+                      {status && <StatusBadge name={status.name} color={status.color} className="shrink-0" />}
                     </div>
-                    <CategoryLabel
-                      name={category.name}
-                      icon={category.icon}
-                      color={category.color}
-                      className="mt-1"
-                    />
+                    <CategoryLabel name={category.name} icon={category.icon} color={category.color} className="mt-1" />
                     <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
                       <span>#{r.number}</span>
                       <TimeAgo date={r.created_at} />
@@ -180,33 +129,16 @@ export function ExplorerView({
               </li>
             );
           })}
-          {visible.length === 0 && (
-            <li className="px-4 py-12 text-center text-sm text-muted-foreground">
-              {t("empty")}
-            </li>
-          )}
+          {visible.length === 0 && <li className="px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</li>}
         </ul>
       </aside>
 
       {/* Map */}
-      <section
-        className={cn(
-          "relative min-h-0 flex-1",
-          mobileView === "list" && "hidden md:block",
-        )}
-      >
+      <section className={cn("relative min-h-0 flex-1", mobileView === "list" && "hidden md:block")}>
         <ReportMap
           className="absolute inset-0 [&_.maplibregl-ctrl-bottom-right]:mb-[72px] md:[&_.maplibregl-ctrl-bottom-right]:mb-0"
-          center={
-            initialReport
-              ? [initialReport.lat, initialReport.lng]
-              : [municipality.center_lat, municipality.center_lng]
-          }
-          zoom={
-            initialReport
-              ? Math.max(municipality.default_zoom, 16)
-              : municipality.default_zoom
-          }
+          center={initialReport ? [initialReport.lat, initialReport.lng] : [municipality.center_lat, municipality.center_lng]}
+          zoom={initialReport ? Math.max(municipality.default_zoom, 16) : municipality.default_zoom}
           pins={pins}
           boundary={boundary}
           selectedId={selectedId}
@@ -232,11 +164,7 @@ export function ExplorerView({
           {mobileView === "map" ? <List /> : <MapIcon />}
           {mobileView === "map" ? tc("list") : tc("map")}
         </Button>
-        <Button
-          className="h-12 flex-[2] shadow-sm"
-          render={<Link href={`/${municipality.slug}/new`} />}
-          nativeButton={false}
-        >
+        <Button className="h-12 flex-[2] shadow-sm" render={<Link href={`/${municipality.slug}/new`} />} nativeButton={false}>
           <Plus />
           {tc("reportIssue")}
         </Button>
@@ -271,12 +199,7 @@ export function ExplorerView({
 
   function renderChips(className?: string, floating?: boolean) {
     return (
-      <div
-        className={cn(
-          "flex gap-1.5 overflow-x-auto [scrollbar-width:none]",
-          className,
-        )}
-      >
+      <div className={cn("flex gap-1.5 overflow-x-auto [scrollbar-width:none]", className)}>
         {activeCategories.length > 0 && (
           <button
             onClick={() => setActiveCategories([])}
@@ -289,39 +212,34 @@ export function ExplorerView({
             {tc("all")}
           </button>
         )}
-        {categories
-          .filter((c) => c.is_active)
-          .map((c) => {
-            const active = activeCategories.includes(c.id);
-            return (
-              <button
-                key={c.id}
-                onClick={() => toggleCategory(c.id)}
-                aria-pressed={active}
-                className={cn(
-                  "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border pr-3 pl-1 text-xs font-medium whitespace-nowrap transition-colors",
-                  active ? "" : "bg-background hover:bg-muted",
-                  floating && "shadow-sm",
-                )}
-                style={
-                  active
-                    ? {
-                        borderColor: c.color,
-                        backgroundColor: `color-mix(in oklch, ${c.color} 14%, white)`,
-                      }
-                    : undefined
-                }
+        {categories.filter((c) => c.is_active).map((c) => {
+          const active = activeCategories.includes(c.id);
+          return (
+            <button
+              key={c.id}
+              onClick={() => toggleCategory(c.id)}
+              aria-pressed={active}
+              className={cn(
+                "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border pr-3 pl-1 text-xs font-medium whitespace-nowrap transition-colors",
+                active ? "" : "bg-background hover:bg-muted",
+                floating && "shadow-sm",
+              )}
+              style={
+                active
+                  ? { borderColor: c.color, backgroundColor: `color-mix(in oklch, ${c.color} 14%, white)` }
+                  : undefined
+              }
+            >
+              <span
+                className="flex size-5 shrink-0 items-center justify-center rounded-full"
+                style={{ backgroundColor: c.color }}
               >
-                <span
-                  className="flex size-5 shrink-0 items-center justify-center rounded-full"
-                  style={{ backgroundColor: c.color }}
-                >
-                  <CategoryIcon name={c.icon} className="size-3 text-white" />
-                </span>
-                {localized(c.name, locale)}
-              </button>
-            );
-          })}
+                <CategoryIcon name={c.icon} className="size-3 text-white" />
+              </span>
+              {localized(c.name, locale)}
+            </button>
+          );
+        })}
       </div>
     );
   }
@@ -339,22 +257,11 @@ export function ExplorerView({
           <X className="size-4" />
         </button>
         <Link href={reportLink(report)} className="flex gap-3 p-3">
-          {category && (
-            <ReportThumb report={report} category={category} large />
-          )}
+          {category && <ReportThumb report={report} category={category} large />}
           <div className="min-w-0 flex-1 pr-6">
             {status && <StatusBadge name={status.name} color={status.color} />}
-            <p className="mt-1.5 line-clamp-2 font-medium leading-snug">
-              {report.title || report.description}
-            </p>
-            {category && (
-              <CategoryLabel
-                name={category.name}
-                icon={category.icon}
-                color={category.color}
-                className="mt-1.5"
-              />
-            )}
+            <p className="mt-1.5 line-clamp-2 font-medium leading-snug">{report.title || report.description}</p>
+            {category && <CategoryLabel name={category.name} icon={category.icon} color={category.color} className="mt-1.5" />}
             <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
               <TimeAgo date={report.created_at} />
               <span className="inline-flex items-center gap-1">
@@ -373,15 +280,7 @@ export function ExplorerView({
   }
 }
 
-function ReportThumb({
-  report,
-  category,
-  large,
-}: {
-  report: ReportListItem;
-  category: Category;
-  large?: boolean;
-}) {
+function ReportThumb({ report, category, large }: { report: ReportListItem; category: Category; large?: boolean }) {
   const size = large ? "size-20" : "size-14";
   if (report.photos[0]) {
     return (
@@ -397,13 +296,8 @@ function ReportThumb({
   }
   return (
     <div
-      className={cn(
-        size,
-        "flex shrink-0 items-center justify-center rounded-lg",
-      )}
-      style={{
-        backgroundColor: `color-mix(in oklch, ${category.color} 12%, white)`,
-      }}
+      className={cn(size, "flex shrink-0 items-center justify-center rounded-lg")}
+      style={{ backgroundColor: `color-mix(in oklch, ${category.color} 12%, white)` }}
     >
       <CategoryIcon name={category.icon} className="size-5" />
     </div>

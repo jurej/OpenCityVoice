@@ -2,28 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { maplibregl } from "./maplibre";
-import type {
-  GeoJSONSource,
-  MapLayerMouseEvent,
-  MapMouseEvent,
-  Map as MapLibreMap,
-} from "maplibre-gl";
+import type { GeoJSONSource, MapLayerMouseEvent, MapMouseEvent, Map as MapLibreMap } from "maplibre-gl";
 import { useTranslations } from "next-intl";
-import {
-  MapStyleControl,
-  boundaryPaint,
-  mapStyle,
-  storedMapStyle,
-  type MapStyleId,
-} from "./map-styles";
+import { MapStyleControl, boundaryPaint, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
 
-export type MapPin = {
-  id: string;
-  lat: number;
-  lng: number;
-  color: string;
-  closed?: boolean;
-};
+export type MapPin = { id: string; lat: number; lng: number; color: string; closed?: boolean };
 
 type Props = {
   center: [number, number];
@@ -36,9 +19,7 @@ type Props = {
   className?: string;
 };
 
-function toFeatureCollection(
-  pins: MapPin[],
-): GeoJSON.FeatureCollection<GeoJSON.Point> {
+function toFeatureCollection(pins: MapPin[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
   return {
     type: "FeatureCollection",
     features: pins.map((p) => ({
@@ -50,16 +31,7 @@ function toFeatureCollection(
   };
 }
 
-export function ReportMap({
-  center,
-  zoom,
-  pins,
-  boundary,
-  selectedId,
-  onSelect,
-  interactive = true,
-  className,
-}: Props) {
+export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, interactive = true, className }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const loaded = useRef(false);
@@ -90,12 +62,7 @@ export function ReportMap({
     if (interactive) {
       map.addControl(
         new MapStyleControl(
-          {
-            title: t("style"),
-            map: t("map"),
-            detailed: t("detailed"),
-            satellite: t("satellite"),
-          },
+          { title: t("style"), map: t("map"), detailed: t("detailed"), satellite: t("satellite") },
           styleId,
           (id) => {
             styleId = id;
@@ -104,15 +71,9 @@ export function ReportMap({
         ),
         "bottom-right",
       );
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
       map.addControl(
-        new maplibregl.NavigationControl({ showCompass: false }),
-        "bottom-right",
-      );
-      map.addControl(
-        new maplibregl.GeolocateControl({
-          positionOptions: { enableHighAccuracy: true },
-          trackUserLocation: false,
-        }),
+        new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }),
         "bottom-right",
       );
     }
@@ -121,9 +82,7 @@ export function ReportMap({
     map.on("style.load", () => {
       map.addSource("boundary", {
         type: "geojson",
-        data: boundary
-          ? { type: "Feature", properties: {}, geometry: boundary }
-          : { type: "FeatureCollection", features: [] },
+        data: boundary ? { type: "Feature", properties: {}, geometry: boundary } : { type: "FeatureCollection", features: [] },
       });
       map.addLayer({
         id: "boundary-line",
@@ -157,11 +116,7 @@ export function ReportMap({
         type: "symbol",
         source: "reports",
         filter: ["has", "point_count"],
-        layout: {
-          "text-field": ["get", "point_count_abbreviated"],
-          "text-size": 12,
-          "text-font": ["Noto Sans Bold"],
-        },
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 12, "text-font": ["Noto Sans Bold"] },
         paint: { "text-color": "#ffffff" },
       });
       map.addLayer({
@@ -172,28 +127,14 @@ export function ReportMap({
         paint: {
           "circle-color": ["get", "color"],
           "circle-opacity": ["case", ["==", ["get", "closed"], 1], 0.45, 1],
-          "circle-radius": [
-            "case",
-            ["boolean", ["feature-state", "selected"], false],
-            11,
-            7.5,
-          ],
-          "circle-stroke-width": [
-            "case",
-            ["boolean", ["feature-state", "selected"], false],
-            4,
-            2.5,
-          ],
+          "circle-radius": ["case", ["boolean", ["feature-state", "selected"], false], 11, 7.5],
+          "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 4, 2.5],
           "circle-stroke-color": "#ffffff",
         },
       });
 
       loaded.current = true;
-      if (selectedRef.current)
-        map.setFeatureState(
-          { source: "reports", id: selectedRef.current },
-          { selected: true },
-        );
+      if (selectedRef.current) map.setFeatureState({ source: "reports", id: selectedRef.current }, { selected: true });
     });
 
     map.on("load", () => {
@@ -206,29 +147,15 @@ export function ReportMap({
         const feature = e.features?.[0];
         if (!feature) return;
         const source = map.getSource("reports") as GeoJSONSource;
-        const nextZoom = await source.getClusterExpansionZoom(
-          feature.properties.cluster_id as number,
-        );
-        map.easeTo({
-          center: (feature.geometry as GeoJSON.Point).coordinates as [
-            number,
-            number,
-          ],
-          zoom: nextZoom,
-        });
+        const nextZoom = await source.getClusterExpansionZoom(feature.properties.cluster_id as number);
+        map.easeTo({ center: (feature.geometry as GeoJSON.Point).coordinates as [number, number], zoom: nextZoom });
       });
       map.on("click", (e: MapMouseEvent) => {
-        const hits = map.queryRenderedFeatures(e.point, {
-          layers: ["pins", "clusters"],
-        });
+        const hits = map.queryRenderedFeatures(e.point, { layers: ["pins", "clusters"] });
         if (hits.length === 0) onSelectRef.current?.(null);
       });
       for (const layer of ["pins", "clusters"]) {
-        map.on(
-          "mouseenter",
-          layer,
-          () => (map.getCanvas().style.cursor = "pointer"),
-        );
+        map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
         map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
       }
     });
@@ -245,10 +172,7 @@ export function ReportMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const apply = () =>
-      (map.getSource("reports") as GeoJSONSource | undefined)?.setData(
-        toFeatureCollection(pins),
-      );
+    const apply = () => (map.getSource("reports") as GeoJSONSource | undefined)?.setData(toFeatureCollection(pins));
     if (loaded.current) apply();
     else map.once("load", apply);
   }, [pins]);
@@ -258,22 +182,14 @@ export function ReportMap({
     if (!map || !selectedId) return;
     const apply = () => {
       if (!map.getSource("reports")) return;
-      map.setFeatureState(
-        { source: "reports", id: selectedId },
-        { selected: true },
-      );
+      map.setFeatureState({ source: "reports", id: selectedId }, { selected: true });
       const pin = pinsRef.current.find((p) => p.id === selectedId);
-      if (pin && !map.getBounds().contains([pin.lng, pin.lat]))
-        map.easeTo({ center: [pin.lng, pin.lat] });
+      if (pin && !map.getBounds().contains([pin.lng, pin.lat])) map.easeTo({ center: [pin.lng, pin.lat] });
     };
     if (loaded.current) apply();
     else map.once("load", apply);
     return () => {
-      if (loaded.current && map.getSource("reports"))
-        map.setFeatureState(
-          { source: "reports", id: selectedId },
-          { selected: false },
-        );
+      if (loaded.current && map.getSource("reports")) map.setFeatureState({ source: "reports", id: selectedId }, { selected: false });
     };
   }, [selectedId]);
 

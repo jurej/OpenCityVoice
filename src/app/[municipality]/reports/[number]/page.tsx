@@ -7,13 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ReportMap } from "@/components/map/report-map";
 import { CategoryLabel, StatusBadge, TimeAgo } from "@/components/report-bits";
 import { PhotoGallery } from "@/components/photo-gallery";
-import {
-  getAccess,
-  getCategories,
-  getCurrentUser,
-  getMunicipality,
-  getStatuses,
-} from "@/lib/data";
+import { getAccess, getCategories, getCurrentUser, getMunicipality, getStatuses } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { localized } from "@/i18n/config";
 import { photoUrl, siteUrl } from "@/lib/config";
@@ -43,26 +37,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { report, municipality } = await loadReport(slug, number);
   const title = `${report.title || report.description.slice(0, 60)} · ${municipality.name}`;
   const description = report.description.slice(0, 160);
-  const images = report.photos
-    .slice(0, 1)
-    .map((path: string) => photoUrl(path));
+  const images = report.photos.slice(0, 1).map((path: string) => photoUrl(path));
   return {
     title,
     description,
     alternates: { canonical: `/${slug}/reports/${report.number}` },
-    openGraph: {
-      type: "article",
-      title,
-      description,
-      images,
-      siteName: "OpenCityVoice",
-    },
-    twitter: {
-      card: images.length ? "summary_large_image" : "summary",
-      title,
-      description,
-      images,
-    },
+    openGraph: { type: "article", title, description, images, siteName: "OpenCityVoice" },
+    twitter: { card: images.length ? "summary_large_image" : "summary", title, description, images },
   };
 }
 
@@ -73,14 +54,7 @@ export default async function ReportPage({ params }: Params) {
   const locale = await getLocale();
   const user = await getCurrentUser();
 
-  const [
-    categories,
-    statuses,
-    access,
-    { data: events },
-    { data: comments },
-    { data: vote },
-  ] = await Promise.all([
+  const [categories, statuses, access, { data: events }, { data: comments }, { data: vote }] = await Promise.all([
     getCategories(municipality.id),
     getStatuses(municipality.id),
     getAccess(municipality.id),
@@ -91,18 +65,11 @@ export default async function ReportPage({ params }: Params) {
       .order("created_at", { ascending: false }),
     supabase
       .from("report_comments")
-      .select(
-        "id, body, is_official, created_at, author_id, author:profiles(full_name, avatar_url)",
-      )
+      .select("id, body, is_official, created_at, author_id, author:profiles(full_name, avatar_url)")
       .eq("report_id", report.id)
       .order("created_at"),
     user
-      ? supabase
-          .from("report_votes")
-          .select("report_id")
-          .eq("report_id", report.id)
-          .eq("user_id", user.id)
-          .maybeSingle()
+      ? supabase.from("report_votes").select("report_id").eq("report_id", report.id).eq("user_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 
@@ -111,19 +78,11 @@ export default async function ReportPage({ params }: Params) {
   const statusById = new Map(statuses.map((s) => [s.id, s]));
   const path = `/${slug}/reports/${report.number}`;
   const mapHref = `/${slug}?report=${report.id}`;
-  const publicEvents = (events ?? []).filter(
-    (e) => e.type === "created" || e.type === "status_changed",
-  );
+  const publicEvents = (events ?? []).filter((e) => e.type === "created" || e.type === "status_changed");
 
   return (
-    <div
-      style={{ "--primary": municipality.primary_color } as React.CSSProperties}
-    >
-      <SiteHeader
-        municipality={municipality}
-        isStaff={access.isStaff}
-        next={path}
-      />
+    <div style={{ "--primary": municipality.primary_color } as React.CSSProperties}>
+      <SiteHeader municipality={municipality} isStaff={access.isStaff} next={path} />
       <main className="mx-auto max-w-5xl px-4 pt-4 pb-16 sm:pt-6">
         <Link
           href={mapHref}
@@ -137,33 +96,19 @@ export default async function ReportPage({ params }: Params) {
           <article className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge name={status.name} color={status.color} />
-              <span className="text-xs text-muted-foreground">
-                {t("number", { number: report.number })}
-              </span>
+              <span className="text-xs text-muted-foreground">{t("number", { number: report.number })}</span>
             </div>
             <h1 className="mt-3 text-2xl font-semibold text-balance sm:text-3xl">
               {report.title || localized(category.name, locale)}
             </h1>
-            <CategoryLabel
-              name={category.name}
-              icon={category.icon}
-              color={category.color}
-              className="mt-3 text-sm"
-            />
+            <CategoryLabel name={category.name} icon={category.icon} color={category.color} className="mt-3 text-sm" />
             <p className="mt-2 text-sm text-muted-foreground">
-              {t("reportedBy", {
-                name: report.author?.full_name || t("anonymous"),
-              })}{" "}
-              · <TimeAgo date={report.created_at} />
+              {t("reportedBy", { name: report.author?.full_name || t("anonymous") })} · <TimeAgo date={report.created_at} />
             </p>
 
-            {report.photos.length > 0 && (
-              <PhotoGallery paths={report.photos} className="mt-6" />
-            )}
+            {report.photos.length > 0 && <PhotoGallery paths={report.photos} className="mt-6" />}
 
-            <p className="mt-6 leading-relaxed whitespace-pre-line">
-              {report.description}
-            </p>
+            <p className="mt-6 leading-relaxed whitespace-pre-line">{report.description}</p>
 
             <div className="mt-6 flex flex-wrap gap-2">
               <VoteButton
@@ -177,16 +122,11 @@ export default async function ReportPage({ params }: Params) {
 
             <section className="mt-6 rounded-xl border bg-muted/30 p-4">
               <h2 className="text-sm font-semibold">{t("shareTitle")}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("shareText")}
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("shareText")}</p>
               <ShareButtons
                 className="mt-3"
                 url={`${siteUrl}${path}`}
-                text={t("shareMessage", {
-                  title: report.title || report.description.slice(0, 80),
-                  municipality: municipality.name,
-                })}
+                text={t("shareMessage", { title: report.title || report.description.slice(0, 80), municipality: municipality.name })}
               />
             </section>
 
@@ -209,37 +149,22 @@ export default async function ReportPage({ params }: Params) {
 
           <aside className="space-y-6">
             <section className="overflow-hidden rounded-xl border">
-              <Link
-                href={mapHref}
-                aria-label={t("showOnMap")}
-                className="block"
-              >
+              <Link href={mapHref} aria-label={t("showOnMap")} className="block">
                 <ReportMap
                   className="pointer-events-none h-48 w-full"
                   center={[report.lat, report.lng]}
                   zoom={16}
                   interactive={false}
-                  pins={[
-                    {
-                      id: report.id,
-                      lat: report.lat,
-                      lng: report.lng,
-                      color: category.color,
-                    },
-                  ]}
+                  pins={[{ id: report.id, lat: report.lat, lng: report.lng, color: category.color }]}
                 />
               </Link>
               <div className="flex items-start gap-2 p-3 text-sm">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="text-muted-foreground">
-                    {report.address ||
-                      `${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`}
+                    {report.address || `${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`}
                   </p>
-                  <Link
-                    href={mapHref}
-                    className="mt-1 inline-block font-medium underline-offset-4 hover:underline"
-                  >
+                  <Link href={mapHref} className="mt-1 inline-block font-medium underline-offset-4 hover:underline">
                     {t("showOnMap")}
                   </Link>
                 </div>
@@ -250,19 +175,11 @@ export default async function ReportPage({ params }: Params) {
               <h2 className="text-sm font-semibold">{t("timeline")}</h2>
               <ol className="mt-3 space-y-0">
                 {publicEvents.map((event, i) => {
-                  const to = event.to_status_id
-                    ? statusById.get(event.to_status_id)
-                    : null;
+                  const to = event.to_status_id ? statusById.get(event.to_status_id) : null;
                   return (
-                    <li
-                      key={event.id}
-                      className="relative flex gap-3 pb-5 last:pb-0"
-                    >
+                    <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
                       {i < publicEvents.length - 1 && (
-                        <span
-                          className="absolute top-3 bottom-0 left-[5px] w-px bg-border"
-                          aria-hidden="true"
-                        />
+                        <span className="absolute top-3 bottom-0 left-[5px] w-px bg-border" aria-hidden="true" />
                       )}
                       <span
                         className="relative mt-1.5 size-[11px] shrink-0 rounded-full border-2 border-background ring-1 ring-border"
@@ -272,18 +189,11 @@ export default async function ReportPage({ params }: Params) {
                         <p className="font-medium">
                           {event.type === "created"
                             ? t("events.created")
-                            : t("events.status_changed", {
-                                status: to ? localized(to.name, locale) : "",
-                              })}
+                            : t("events.status_changed", { status: to ? localized(to.name, locale) : "" })}
                         </p>
-                        <TimeAgo
-                          date={event.created_at}
-                          className="text-xs text-muted-foreground"
-                        />
+                        <TimeAgo date={event.created_at} className="text-xs text-muted-foreground" />
                         {event.note && (
-                          <p className="mt-1.5 rounded-md bg-muted px-3 py-2 text-sm whitespace-pre-line">
-                            {event.note}
-                          </p>
+                          <p className="mt-1.5 rounded-md bg-muted px-3 py-2 text-sm whitespace-pre-line">{event.note}</p>
                         )}
                       </div>
                     </li>
