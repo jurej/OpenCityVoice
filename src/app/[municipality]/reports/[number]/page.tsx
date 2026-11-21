@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { ArrowLeft, EyeOff, MapPin } from "lucide-react";
+import { ArrowLeft, Copy, EyeOff, MapPin } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ReportMap } from "@/components/map/report-map";
 import { CategoryLabel, StatusBadge, TimeAgo } from "@/components/report-bits";
@@ -69,13 +69,17 @@ export default async function ReportPage({ params }: Params) {
       .order("created_at", { ascending: false }),
     supabase
       .from("report_comments")
-      .select("id, body, is_official, is_hidden, created_at, author_id, author:profiles(full_name, avatar_url)")
+      .select("id, body, photos, is_official, is_hidden, created_at, author_id, author:profiles(full_name, avatar_url)")
       .eq("report_id", report.id)
       .order("created_at"),
     user
       ? supabase.from("report_votes").select("report_id").eq("report_id", report.id).eq("user_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
+
+  const { data: original } = report.duplicate_of
+    ? await supabase.from("reports").select("number").eq("id", report.duplicate_of).maybeSingle()
+    : { data: null };
 
   const category = categories.find((c) => c.id === report.category_id)!;
   const status = statuses.find((s) => s.id === report.status_id)!;
@@ -106,6 +110,21 @@ export default async function ReportPage({ params }: Params) {
               <p className="mt-4 flex items-start gap-2 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-900">
                 <EyeOff className="mt-0.5 size-4 shrink-0" />
                 {tm("hiddenNotice")}
+              </p>
+            )}
+            {original && (
+              <p className="mt-4 flex items-start gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm">
+                <Copy className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <span>
+                  {t.rich("duplicateOf", {
+                    number: original.number,
+                    link: (chunks) => (
+                      <Link href={`/${slug}/reports/${original.number}`} className="font-medium underline underline-offset-4">
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
+                </span>
               </p>
             )}
             <h1 className="mt-3 text-2xl font-semibold text-balance sm:text-3xl">
@@ -157,6 +176,7 @@ export default async function ReportPage({ params }: Params) {
                 body: c.body,
                 isOfficial: c.is_official,
                 isHidden: c.is_hidden,
+                photos: c.photos,
                 createdAt: c.created_at,
                 authorId: c.author_id,
                 authorName: c.author?.full_name ?? null,
