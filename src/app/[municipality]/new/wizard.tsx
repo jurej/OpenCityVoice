@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryIcon } from "@/components/category-icon";
 import { LocationPicker } from "@/components/map/location-picker";
+import { IndependentNotice } from "@/components/legal-links";
 import { createReport, toggleVote } from "@/app/actions/reports";
 import { createClient } from "@/lib/supabase/client";
 import { localized } from "@/i18n/config";
@@ -468,6 +469,7 @@ export function NewReportWizard({ userId, municipality, categories, boundary }: 
           )}
 
           <div className="pb-safe sticky bottom-0 mt-auto bg-background pt-6">
+            {!municipality.is_official && <IndependentNotice municipality={municipality.name} className="mb-3" />}
             <Button className="h-12 w-full" disabled={!canSubmit} onClick={() => submit(Boolean(duplicates))}>
               {submitting && <Loader2 className="animate-spin" />}
               {submitting ? t("submitting") : duplicates ? t("notDuplicate") : t("submit")}

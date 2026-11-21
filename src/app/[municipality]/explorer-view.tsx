@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ReportMap, type MapPin } from "@/components/map/report-map";
 import { CategoryLabel, StatusBadge, TimeAgo } from "@/components/report-bits";
 import { CategoryIcon } from "@/components/category-icon";
+import { IndependentNotice, LegalLinks } from "@/components/legal-links";
 import { useLocale, useTranslations } from "next-intl";
 import { localized } from "@/i18n/config";
 import { photoUrl } from "@/lib/config";
@@ -130,6 +131,10 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
             );
           })}
           {visible.length === 0 && <li className="px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</li>}
+          <li className="space-y-2 px-4 py-4">
+            {!municipality.is_official && <IndependentNotice municipality={municipality.name} />}
+            <LegalLinks />
+          </li>
         </ul>
       </aside>
 

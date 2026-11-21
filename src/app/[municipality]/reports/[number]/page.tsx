@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, EyeOff, MapPin } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ReportMap } from "@/components/map/report-map";
 import { CategoryLabel, StatusBadge, TimeAgo } from "@/components/report-bits";
 import { PhotoGallery } from "@/components/photo-gallery";
+import { FlagButton } from "@/components/flag-button";
+import { IndependentNotice, LegalLinks } from "@/components/legal-links";
 import { getAccess, getCategories, getCurrentUser, getMunicipality, getStatuses } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { localized } from "@/i18n/config";
@@ -14,6 +16,7 @@ import { photoUrl, siteUrl } from "@/lib/config";
 import { VoteButton } from "./vote-button";
 import { Comments } from "./comments";
 import { ShareButtons } from "./share-button";
+import { HideReportButton } from "./hide-button";
 
 type Params = PageProps<"/[municipality]/reports/[number]">;
 
@@ -51,6 +54,7 @@ export default async function ReportPage({ params }: Params) {
   const { municipality: slug, number } = await params;
   const { municipality, report, supabase } = await loadReport(slug, number);
   const t = await getTranslations("report");
+  const tm = await getTranslations("moderation");
   const locale = await getLocale();
   const user = await getCurrentUser();
 
@@ -65,7 +69,7 @@ export default async function ReportPage({ params }: Params) {
       .order("created_at", { ascending: false }),
     supabase
       .from("report_comments")
-      .select("id, body, is_official, created_at, author_id, author:profiles(full_name, avatar_url)")
+      .select("id, body, is_official, is_hidden, created_at, author_id, author:profiles(full_name, avatar_url)")
       .eq("report_id", report.id)
       .order("created_at"),
     user
@@ -98,6 +102,12 @@ export default async function ReportPage({ params }: Params) {
               <StatusBadge name={status.name} color={status.color} />
               <span className="text-xs text-muted-foreground">{t("number", { number: report.number })}</span>
             </div>
+            {report.is_hidden && (
+              <p className="mt-4 flex items-start gap-2 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <EyeOff className="mt-0.5 size-4 shrink-0" />
+                {tm("hiddenNotice")}
+              </p>
+            )}
             <h1 className="mt-3 text-2xl font-semibold text-balance sm:text-3xl">
               {report.title || localized(category.name, locale)}
             </h1>
@@ -110,7 +120,7 @@ export default async function ReportPage({ params }: Params) {
 
             <p className="mt-6 leading-relaxed whitespace-pre-line">{report.description}</p>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               <VoteButton
                 reportId={report.id}
                 count={report.vote_count}
@@ -118,6 +128,13 @@ export default async function ReportPage({ params }: Params) {
                 signedIn={Boolean(user)}
                 path={path}
               />
+              <div className="ml-auto">
+                {access.isStaff ? (
+                  <HideReportButton reportId={report.id} hidden={report.is_hidden} />
+                ) : (
+                  user && user.id !== report.author_id && <FlagButton reportId={report.id} />
+                )}
+              </div>
             </div>
 
             <section className="mt-6 rounded-xl border bg-muted/30 p-4">
@@ -139,6 +156,7 @@ export default async function ReportPage({ params }: Params) {
                 id: c.id,
                 body: c.body,
                 isOfficial: c.is_official,
+                isHidden: c.is_hidden,
                 createdAt: c.created_at,
                 authorId: c.author_id,
                 authorName: c.author?.full_name ?? null,
@@ -203,6 +221,10 @@ export default async function ReportPage({ params }: Params) {
             </section>
           </aside>
         </div>
+        <footer className="mt-12 space-y-3 border-t pt-6">
+          {!municipality.is_official && <IndependentNotice municipality={municipality.name} />}
+          <LegalLinks />
+        </footer>
       </main>
     </div>
   );

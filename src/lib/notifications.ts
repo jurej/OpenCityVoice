@@ -2,7 +2,7 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { emailBrand, sendEmail } from "@/lib/email";
-import { localized } from "@/i18n/config";
+import { configuredLocale, defaultLocale, localized } from "@/i18n/config";
 import { siteUrl } from "@/lib/config";
 
 async function recipient(admin: ReturnType<typeof createAdminClient>, userId: string) {
@@ -11,7 +11,7 @@ async function recipient(admin: ReturnType<typeof createAdminClient>, userId: st
     admin.from("profiles").select("locale").eq("id", userId).single(),
   ]);
   const email = user?.user?.email;
-  return email ? { email, locale: profile?.locale ?? "en" } : null;
+  return email ? { email, locale: profile?.locale ?? configuredLocale() ?? defaultLocale } : null;
 }
 
 /** E-mails staff members who follow the report's category. */
@@ -123,4 +123,57 @@ export async function notifyAssigneeOfComment(reportId: string, commenterId: str
     accentColor: municipality.primary_color,
     brand: emailBrand(municipality),
   });
+}
+
+/** E-mails municipality admins when content is flagged, once per piece of content until it is resolved. */
+export async function notifyModeratorsOfFlag(reportId: string, commentId: string | null, reason: string) {
+  const admin = createAdminClient();
+  const openFlags = admin
+    .from("content_flags")
+    .select("id", { count: "exact", head: true })
+    .eq("report_id", reportId)
+    .is("resolved_at", null);
+  const [{ count }, { data: report }, { data: comment }] = await Promise.all([
+    commentId ? openFlags.eq("comment_id", commentId) : openFlags.is("comment_id", null),
+    admin
+      .from("reports")
+      .select("id, number, title, description, municipality_id, municipalities(slug, name, primary_color, logo_path)")
+      .eq("id", reportId)
+      .single(),
+    commentId
+      ? admin.from("report_comments").select("body").eq("id", commentId).single()
+      : Promise.resolve({ data: null }),
+  ]);
+  if ((count ?? 0) > 1 || !report?.municipalities) return;
+  const { data: members } = await admin
+    .from("municipality_members")
+    .select("user_id")
+    .eq("municipality_id", report.municipality_id)
+    .eq("status", "approved")
+    .eq("role", "admin");
+
+  const municipality = report.municipalities;
+  const title = report.title || report.description.slice(0, 80);
+  await Promise.all(
+    (members ?? []).map(async ({ user_id }) => {
+      const to = await recipient(admin, user_id);
+      if (!to) return;
+      const t = await getTranslations({ locale: to.locale, namespace: "email" });
+      await sendEmail({
+        to: to.email,
+        subject: t("flagSubject", { municipality: municipality.name, number: report.number }),
+        paragraphs: [
+          t(comment ? "flagCommentIntro" : "flagReportIntro", { number: report.number, title }),
+          ...(reason ? [t("flagReason", { reason })] : []),
+        ],
+        quote: {
+          label: comment ? t("commentLabel") : t("newReportDescription"),
+          text: comment?.body ?? report.description,
+        },
+        action: { label: t("openModeration"), url: `${siteUrl}/${municipality.slug}/manage/moderation` },
+        accentColor: municipality.primary_color,
+        brand: emailBrand(municipality),
+      });
+    }),
+  );
 }

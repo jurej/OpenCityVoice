@@ -45,3 +45,11 @@ export async function setMunicipalityActive(id: string, active: boolean) {
   revalidatePath("/", "layout");
   return { ok: !error };
 }
+
+/** Marks a municipality as running this deployment itself, which hides the "independent initiative" notice. */
+export async function setMunicipalityOfficial(id: string, official: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("municipalities").update({ is_official: official }).eq("id", id);
+  revalidatePath("/", "layout");
+  return { ok: !error };
+}

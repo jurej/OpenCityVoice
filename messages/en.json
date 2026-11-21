@@ -69,7 +69,7 @@
     "useDifferentEmail": "Use a different e-mail",
     "invalidCode": "The code is invalid or has expired.",
     "invalidCredentials": "Wrong e-mail or password.",
-    "terms": "By continuing you agree that your name and reports are shown publicly. Your e-mail address is never published.",
+    "terms": "By continuing you accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>. Your name and reports are shown publicly; your e-mail address is never published.",
     "authError": "Sign-in failed. Please try again.",
     "required": "Please sign in to continue."
   },
@@ -242,7 +242,8 @@
     "anyVotes": "Any number of votes",
     "minVotesOption": "{count}+ votes",
     "recentVotes": "+{count} in 7 days",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "moderation": "Moderation"
   },
   "team": {
     "title": "Team and responsible people",
@@ -324,7 +325,8 @@
     "boundary": "Boundary",
     "yes": "Yes",
     "no": "No",
-    "slugTaken": "This slug is already in use."
+    "slugTaken": "This slug is already in use.",
+    "official": "Official"
   },
   "forward": {
     "title": "Report #{number} forwarded by {municipality}",
@@ -353,7 +355,12 @@
     "commentIntro": "{name} commented on report #{number} \"{title}\", which is assigned to you.",
     "commentLabel": "Comment:",
     "someone": "A citizen",
-    "staffFooter": "You receive this e-mail because of your notification settings in the municipality team. Change them at {url}."
+    "staffFooter": "You receive this e-mail because of your notification settings in the municipality team. Change them at {url}.",
+    "flagSubject": "{municipality}: content flagged on report #{number}",
+    "flagReportIntro": "A user flagged report #{number} “{title}” as inappropriate.",
+    "flagCommentIntro": "A user flagged a comment on report #{number} “{title}” as inappropriate.",
+    "flagReason": "Reason: {reason}",
+    "openModeration": "Open moderation"
   },
   "notFound": {
     "title": "Page not found",
@@ -376,5 +383,40 @@
     "comments": "Comments on my reports",
     "commentsText": "Get an e-mail when someone comments on a report assigned to you.",
     "notMember": "Notifications are available to approved members of the municipality team."
+  },
+  "moderation": {
+    "title": "Moderation",
+    "intro": "Content flagged by users. Hidden content is not public; its author and staff can still see it.",
+    "flagReport": "Flag as inappropriate",
+    "flagComment": "Flag comment",
+    "flagReportTitle": "Flag this report",
+    "flagCommentTitle": "Flag this comment",
+    "flagHelp": "For example offensive content, personal data, faces or licence plates, or advertising. A moderator will review it.",
+    "reason": "Reason",
+    "reasonPlaceholder": "Reason (optional)",
+    "send": "Send",
+    "flagged": "Thanks, a moderator will review it.",
+    "hide": "Hide",
+    "show": "Unhide",
+    "hideReport": "Hide report",
+    "showReport": "Unhide report",
+    "hidden": "Hidden",
+    "hiddenNotice": "This report is hidden. Only its author and municipality staff can see it.",
+    "openFlags": "Flags",
+    "noFlags": "No open flags.",
+    "flagCount": "{count, plural, one {# flag} other {# flags}}",
+    "comment": "Comment on report #{number}",
+    "report": "Report #{number}",
+    "hideContent": "Hide content",
+    "dismiss": "Dismiss",
+    "hiddenContent": "Hidden content",
+    "noHidden": "Nothing is hidden.",
+    "noReason": "No reason given"
+  },
+  "legal": {
+    "privacy": "Privacy",
+    "terms": "Terms of use",
+    "updated": "Last updated: {date}",
+    "independent": "Independent citizen initiative. {municipality} does not run this site and does not receive reports automatically."
   }
 }
