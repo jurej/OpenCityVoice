@@ -71,6 +71,7 @@ export async function getReports(municipalityId: string, limit = 2000): Promise<
       .from("reports")
       .select(REPORT_LIST_COLUMNS)
       .eq("municipality_id", municipalityId)
+      .eq("is_hidden", false)
       .order("created_at", { ascending: false })
       .order("id")
       .range(from, to);
@@ -88,6 +89,7 @@ export async function getReportListItem(municipalityId: string, reportId: string
     .from("reports")
     .select(REPORT_LIST_COLUMNS)
     .eq("municipality_id", municipalityId)
+    .eq("is_hidden", false)
     .eq("id", reportId)
     .maybeSingle();
   return data;

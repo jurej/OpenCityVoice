@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { LegalLinks } from "@/components/legal-links";
 import { getTranslations } from "next-intl/server";
 import { Camera, MapPin, BellRing } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -62,7 +63,10 @@ export default async function HomePage() {
       <footer className="border-t">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6 text-xs text-muted-foreground">
           <span>{tc("poweredBy")}</span>
-          <a href="https://github.com/jurej/OpenCityVoice" className="hover:text-foreground">GitHub</a>
+          <div className="flex gap-4">
+            <LegalLinks />
+            <a href="https://github.com/jurej/OpenCityVoice" className="hover:text-foreground">GitHub</a>
+          </div>
         </div>
       </footer>
     </>

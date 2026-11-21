@@ -1,7 +1,7 @@
 -- Database tests (pgTAP). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(24);
+select plan(31);
 
 -- Seed ids
 \set lj '\'10000000-0000-4000-8000-000000000001\''
@@ -152,6 +152,36 @@ select throws_ok(
 select throws_ok(
   'select public.prepare_new_report()',
   '42501', null, 'trigger functions cannot be called through the API');
+reset role;
+
+-- Moderation: flags and hidden content
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :citizen, 'role', 'authenticated')::text, true);
+select lives_ok(
+  format($f$insert into public.content_flags (report_id, reporter_id, reason)
+    select id, %L, 'Spam' from public.reports where description = 'Broken bench in the park'$f$, :citizen),
+  'signed-in users can flag a report');
+select set_config('request.jwt.claims', json_build_object('sub', :staff, 'role', 'authenticated')::text, true);
+select throws_ok(
+  format($f$update public.municipalities set is_official = true where id = %L$f$, :lj),
+  'P0001', 'Not allowed to change is_official', 'municipality admins cannot mark a municipality as official');
+select is((select count(*)::int from public.content_flags where reason = 'Spam'), 1, 'staff see flags for their municipality');
+update public.reports set is_hidden = true where description = 'Broken bench in the park';
+reset role;
+set local role anon;
+select set_config('request.jwt.claims', '{"role": "anon"}', true);
+select is((select count(*)::int from public.reports where description = 'Broken bench in the park'), 0, 'hidden reports are not public');
+reset role;
+select set_config('test.hidden_report', (select id::text from public.reports where description = 'Broken bench in the park'), true);
+set local role anon;
+select is((select count(*)::int from public.report_events where report_id = current_setting('test.hidden_report')::uuid), 0, 'events of hidden reports are not public');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :citizen, 'role', 'authenticated')::text, true);
+select is((select count(*)::int from public.reports where description = 'Broken bench in the park'), 1, 'authors still see their hidden reports');
+select throws_ok(
+  format($f$select public.set_comment_hidden((select id from public.report_comments limit 1), true)$f$),
+  'P0001', 'Not allowed', 'citizens cannot hide comments');
 reset role;
 
 select * from finish();

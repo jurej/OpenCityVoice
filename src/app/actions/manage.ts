@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { sendEmail, emailBrand } from "@/lib/email";
-import { localized } from "@/i18n/config";
+import { configuredLocale, defaultLocale, localized } from "@/i18n/config";
 import { siteUrl } from "@/lib/config";
 
 type Result = { ok: true } | { ok: false; error?: string };
@@ -94,7 +94,7 @@ async function notifyAuthor(
   const email = user?.user?.email;
   if (!email) return;
 
-  const locale = author.locale ?? "en";
+  const locale = author.locale ?? configuredLocale() ?? defaultLocale;
   const t = await getTranslations({ locale, namespace: "email" });
   const municipality = report.municipalities!;
   const status = localized(statusName, locale);
@@ -137,7 +137,7 @@ export async function assignReport(reportId: string, assigneeId: string | null):
     ]);
     const email = user?.user?.email;
     if (email) {
-      const t = await getTranslations({ locale: profile?.locale ?? "en", namespace: "email" });
+      const t = await getTranslations({ locale: profile?.locale ?? configuredLocale() ?? defaultLocale, namespace: "email" });
       const municipality = report.municipalities!;
       await sendEmail({
         to: email,

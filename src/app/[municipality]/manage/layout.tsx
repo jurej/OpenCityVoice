@@ -16,6 +16,7 @@ export default async function ManageLayout({ children, params }: LayoutProps<"/[
     { href: `/${slug}/manage`, label: t("dashboard") },
     { href: `/${slug}/manage/team`, label: t("team") },
     { href: `/${slug}/manage/notifications`, label: t("notifications") },
+    { href: `/${slug}/manage/moderation`, label: t("moderation") },
     ...(access.isAdmin ? [{ href: `/${slug}/manage/settings`, label: t("settings") }] : []),
   ];
 

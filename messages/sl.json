@@ -69,7 +69,7 @@
     "useDifferentEmail": "Uporabi drug e-naslov",
     "invalidCode": "Koda ni veljavna ali je potekla.",
     "invalidCredentials": "Napačen e-naslov ali geslo.",
-    "terms": "Z nadaljevanjem se strinjate, da sta vaše ime in pobude javno vidni. Vašega e-naslova nikoli ne objavimo.",
+    "terms": "Z nadaljevanjem sprejemate <terms>pogoje uporabe</terms> in <privacy>politiko zasebnosti</privacy>. Vaše ime in pobude so javno vidni, e-naslova nikoli ne objavimo.",
     "authError": "Prijava ni uspela. Poskusite znova.",
     "required": "Za nadaljevanje se prijavite."
   },
@@ -242,7 +242,8 @@
     "anyVotes": "Poljubno število glasov",
     "minVotesOption": "{count}+ glasov",
     "recentVotes": "+{count} v 7 dneh",
-    "notifications": "Obvestila"
+    "notifications": "Obvestila",
+    "moderation": "Moderacija"
   },
   "team": {
     "title": "Ekipa in odgovorne osebe",
@@ -324,7 +325,8 @@
     "boundary": "Meja",
     "yes": "Da",
     "no": "Ne",
-    "slugTaken": "Ta oznaka je že v uporabi."
+    "slugTaken": "Ta oznaka je že v uporabi.",
+    "official": "Uradni kanal"
   },
   "forward": {
     "title": "Pobuda #{number}, posredovala: {municipality}",
@@ -353,7 +355,12 @@
     "commentIntro": "{name} je komentiral/a pobudo #{number} \"{title}\", ki je dodeljena vam.",
     "commentLabel": "Komentar:",
     "someone": "Občan",
-    "staffFooter": "To e-pošto prejemate zaradi nastavitev obvestil v ekipi občine. Spremenite jih na {url}."
+    "staffFooter": "To e-pošto prejemate zaradi nastavitev obvestil v ekipi občine. Spremenite jih na {url}.",
+    "flagSubject": "{municipality}: prijavljena vsebina pri pobudi #{number}",
+    "flagReportIntro": "Uporabnik je pobudo #{number} »{title}« prijavil kot neprimerno.",
+    "flagCommentIntro": "Uporabnik je komentar pri pobudi #{number} »{title}« prijavil kot neprimeren.",
+    "flagReason": "Razlog: {reason}",
+    "openModeration": "Odpri moderacijo"
   },
   "notFound": {
     "title": "Stran ne obstaja",
@@ -376,5 +383,40 @@
     "comments": "Komentarji na mojih pobudah",
     "commentsText": "Prejmite e-pošto, ko nekdo komentira pobudo, ki je dodeljena vam.",
     "notMember": "Obvestila so na voljo potrjenim članom ekipe občine."
+  },
+  "moderation": {
+    "title": "Moderacija",
+    "intro": "Vsebine, ki so jih prijavili uporabniki. Skrita vsebina ni javno vidna, vidita jo le avtor in odgovorne osebe.",
+    "flagReport": "Prijavi neprimerno vsebino",
+    "flagComment": "Prijavi komentar",
+    "flagReportTitle": "Prijavi neprimerno pobudo",
+    "flagCommentTitle": "Prijavi neprimeren komentar",
+    "flagHelp": "Npr. žaljiva vsebina, osebni podatki, obrazi ali registrske tablice, oglaševanje. Prijavo bo pregledal moderator.",
+    "reason": "Razlog",
+    "reasonPlaceholder": "Razlog (neobvezno)",
+    "send": "Pošlji prijavo",
+    "flagged": "Hvala, prijavo bo pregledal moderator.",
+    "hide": "Skrij",
+    "show": "Prikaži",
+    "hideReport": "Skrij pobudo",
+    "showReport": "Prikaži pobudo",
+    "hidden": "Skrito",
+    "hiddenNotice": "Ta pobuda je skrita. Vidita jo le avtor in odgovorne osebe občine.",
+    "openFlags": "Prijave",
+    "noFlags": "Ni odprtih prijav.",
+    "flagCount": "{count, plural, one {# prijava} two {# prijavi} few {# prijave} other {# prijav}}",
+    "comment": "Komentar pri pobudi #{number}",
+    "report": "Pobuda #{number}",
+    "hideContent": "Skrij vsebino",
+    "dismiss": "Zavrni prijavo",
+    "hiddenContent": "Skrite vsebine",
+    "noHidden": "Ni skritih vsebin.",
+    "noReason": "Brez razloga"
+  },
+  "legal": {
+    "privacy": "Zasebnost",
+    "terms": "Pogoji uporabe",
+    "updated": "Zadnja sprememba: {date}",
+    "independent": "Neodvisna pobuda občanov. {municipality} ni upravljavec te strani in pobud ne prejema samodejno."
   }
 }

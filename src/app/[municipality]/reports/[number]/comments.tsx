@@ -3,20 +3,23 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BadgeCheck, Loader2, Trash2 } from "lucide-react";
+import { BadgeCheck, Eye, EyeOff, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { TimeAgo } from "@/components/report-bits";
 import { initials } from "@/components/user-menu";
+import { FlagButton } from "@/components/flag-button";
 import { addComment, deleteComment } from "@/app/actions/reports";
+import { setCommentHidden } from "@/app/actions/moderation";
 import { cn } from "@/lib/utils";
 
 type Comment = {
   id: string;
   body: string;
   isOfficial: boolean;
+  isHidden: boolean;
   createdAt: string;
   authorId: string;
   authorName: string | null;
@@ -34,6 +37,7 @@ type Props = {
 export function Comments({ reportId, path, currentUserId, canModerate, comments }: Props) {
   const t = useTranslations("report");
   const tc = useTranslations("common");
+  const tm = useTranslations("moderation");
   const [body, setBody] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -54,6 +58,13 @@ export function Comments({ reportId, path, currentUserId, canModerate, comments 
     });
   }
 
+  function toggleHidden(comment: Comment) {
+    startTransition(async () => {
+      const result = await setCommentHidden(reportId, comment.id, !comment.isHidden);
+      if (!result.ok) toast.error(tc("error"));
+    });
+  }
+
   return (
     <section id="comments" className="mt-10 scroll-mt-20 border-t pt-8">
       <h2 className="font-semibold">
@@ -70,6 +81,7 @@ export function Comments({ reportId, path, currentUserId, canModerate, comments 
             <div
               className={cn(
                 "min-w-0 flex-1",
+                c.isHidden && "opacity-60",
                 c.isOfficial && "rounded-lg border border-primary/25 bg-primary/5 px-3 py-2.5",
               )}
             >
@@ -82,16 +94,34 @@ export function Comments({ reportId, path, currentUserId, canModerate, comments 
                   </span>
                 )}
                 <TimeAgo date={c.createdAt} className="text-xs text-muted-foreground" />
-                {(c.authorId === currentUserId || canModerate) && (
-                  <button
-                    onClick={() => remove(c.id)}
-                    disabled={pending}
-                    className="ml-auto text-muted-foreground hover:text-destructive"
-                    aria-label={t("deleteComment")}
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                )}
+                <div className="ml-auto flex items-center gap-3">
+                  {c.isHidden && <span className="text-xs font-medium text-amber-700">{tm("hidden")}</span>}
+                  {canModerate && (
+                    <button
+                      onClick={() => toggleHidden(c)}
+                      disabled={pending}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={c.isHidden ? tm("show") : tm("hide")}
+                      title={c.isHidden ? tm("show") : tm("hide")}
+                    >
+                      {c.isHidden ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
+                    </button>
+                  )}
+                  {currentUserId && c.authorId !== currentUserId && !canModerate && (
+                    <FlagButton reportId={reportId} commentId={c.id} compact />
+                  )}
+                  {(c.authorId === currentUserId || canModerate) && (
+                    <button
+                      onClick={() => remove(c.id)}
+                      disabled={pending}
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={t("deleteComment")}
+                      title={t("deleteComment")}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="mt-1 text-sm leading-relaxed whitespace-pre-line">{c.body}</p>
             </div>

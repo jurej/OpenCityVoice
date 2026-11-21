@@ -12,6 +12,12 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && (locales as readonly string[]).includes(value);
 }
 
+/** Server-side DEFAULT_LOCALE: the language shown until a user picks another one, regardless of browser language. */
+export function configuredLocale(): Locale | null {
+  const value = process.env.DEFAULT_LOCALE;
+  return isLocale(value) ? value : null;
+}
+
 /** Picks the best supported locale from an Accept-Language header. */
 export function matchLocale(acceptLanguage: string | null | undefined): Locale {
   if (!acceptLanguage) return defaultLocale;

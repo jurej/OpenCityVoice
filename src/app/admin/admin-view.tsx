@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { createMunicipality, setMunicipalityActive } from "@/app/actions/admin";
+import { createMunicipality, setMunicipalityActive, setMunicipalityOfficial } from "@/app/actions/admin";
 
-type Row = { id: string; slug: string; name: string; isActive: boolean; color: string; hasBoundary: boolean; reports: number; open: number };
+type Row = { id: string; slug: string; name: string; isActive: boolean; isOfficial: boolean; color: string; hasBoundary: boolean; reports: number; open: number };
 
 function slugify(value: string) {
   return value
@@ -77,6 +77,7 @@ export function AdminView({ municipalities }: { municipalities: Row[] }) {
                 <th className="px-3 py-2 text-right font-medium">{t("open")}</th>
                 <th className="px-3 py-2 font-medium">{t("boundary")}</th>
                 <th className="px-3 py-2 font-medium">{t("active")}</th>
+                <th className="px-3 py-2 font-medium">{t("official")}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -96,6 +97,12 @@ export function AdminView({ municipalities }: { municipalities: Row[] }) {
                     <Switch
                       checked={m.isActive}
                       onCheckedChange={(value) => startTransition(async () => { await setMunicipalityActive(m.id, value); router.refresh(); })}
+                    />
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <Switch
+                      checked={m.isOfficial}
+                      onCheckedChange={(value) => startTransition(async () => { await setMunicipalityOfficial(m.id, value); router.refresh(); })}
                     />
                   </td>
                 </tr>

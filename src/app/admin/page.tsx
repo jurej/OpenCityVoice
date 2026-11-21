@@ -15,7 +15,7 @@ export default async function AdminPage() {
   if (!user.profile.is_platform_admin) notFound();
   const supabase = await createClient();
   const [{ data: municipalities }, { data: reports }, { data: statuses }] = await Promise.all([
-    supabase.from("municipalities").select("id, slug, name, is_active, primary_color, boundary").order("name"),
+    supabase.from("municipalities").select("id, slug, name, is_active, is_official, primary_color, boundary").order("name"),
     supabase.from("reports").select("municipality_id, status_id"),
     supabase.from("statuses").select("id, is_closed"),
   ]);
@@ -27,6 +27,7 @@ export default async function AdminPage() {
       slug: m.slug,
       name: m.name,
       isActive: m.is_active,
+      isOfficial: m.is_official,
       color: m.primary_color,
       hasBoundary: Boolean(m.boundary),
       reports: own.length,

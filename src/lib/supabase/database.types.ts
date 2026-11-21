@@ -86,6 +86,69 @@ export type Database = {
           },
         ];
       };
+      content_flags: {
+        Row: {
+          comment_id: string | null;
+          created_at: string;
+          id: string;
+          reason: string | null;
+          report_id: string;
+          reporter_id: string;
+          resolved_at: string | null;
+          resolved_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          comment_id?: string | null;
+          created_at?: string;
+          id?: string;
+          reason?: string | null;
+          report_id: string;
+          reporter_id?: string;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+        };
+        Update: {
+          comment_id?: string | null;
+          created_at?: string;
+          id?: string;
+          reason?: string | null;
+          report_id?: string;
+          reporter_id?: string;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "content_flags_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "report_comments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "content_flags_report_id_fkey";
+            columns: ["report_id"];
+            isOneToOne: false;
+            referencedRelation: "reports";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "content_flags_reporter_id_fkey";
+            columns: ["reporter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "content_flags_resolved_by_fkey";
+            columns: ["resolved_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       municipalities: {
         Row: {
           boundary: unknown;
@@ -96,6 +159,7 @@ export type Database = {
           default_zoom: number;
           id: string;
           is_active: boolean;
+          is_official: boolean;
           logo_path: string | null;
           name: string;
           primary_color: string;
@@ -113,6 +177,7 @@ export type Database = {
           default_zoom?: number;
           id?: string;
           is_active?: boolean;
+          is_official?: boolean;
           logo_path?: string | null;
           name: string;
           primary_color?: string;
@@ -129,6 +194,7 @@ export type Database = {
           default_zoom?: number;
           id?: string;
           is_active?: boolean;
+          is_official?: boolean;
           logo_path?: string | null;
           name?: string;
           primary_color?: string;
@@ -218,12 +284,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      rate_limit_events: {
+        Row: {
+          created_at: string;
+          kind: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          kind: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          kind?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rate_limit_events_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       report_comments: {
         Row: {
           author_id: string;
           body: string;
           created_at: string;
           id: string;
+          is_hidden: boolean;
           is_official: boolean;
           report_id: string;
         };
@@ -233,6 +327,7 @@ export type Database = {
           body: string;
           created_at?: string;
           id?: string;
+          is_hidden?: boolean;
           is_official?: boolean;
           report_id: string;
         };
@@ -241,6 +336,7 @@ export type Database = {
           body?: string;
           created_at?: string;
           id?: string;
+          is_hidden?: boolean;
           is_official?: boolean;
           report_id?: string;
         };
@@ -427,6 +523,7 @@ export type Database = {
           created_at: string;
           description: string;
           id: string;
+          is_hidden: boolean;
           lat: number;
           lng: number;
           location: unknown;
@@ -448,6 +545,7 @@ export type Database = {
           created_at?: string;
           description: string;
           id?: string;
+          is_hidden?: boolean;
           lat: number;
           lng: number;
           location?: never;
@@ -468,6 +566,7 @@ export type Database = {
           created_at?: string;
           description?: string;
           id?: string;
+          is_hidden?: boolean;
           lat?: number;
           lng?: number;
           location?: never;
@@ -567,6 +666,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      consume_rate_limit: {
+        Args: { p_kind: string; p_limits: Json };
+        Returns: undefined;
+      };
       get_forwarded_report: { Args: { p_token: string }; Returns: Json };
       is_municipality_admin: { Args: { mid: string }; Returns: boolean };
       is_municipality_staff: { Args: { mid: string }; Returns: boolean };
@@ -582,6 +685,7 @@ export type Database = {
           default_zoom: number;
           id: string;
           is_active: boolean;
+          is_official: boolean;
           logo_path: string | null;
           name: string;
           primary_color: string;
@@ -631,6 +735,10 @@ export type Database = {
           report_id: string;
           votes: number;
         }[];
+      };
+      set_comment_hidden: {
+        Args: { p_comment_id: string; p_hidden: boolean };
+        Returns: undefined;
       };
       set_municipality_boundary: {
         Args: { p_geojson: Json; p_municipality_id: string };

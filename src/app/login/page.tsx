@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Brand } from "@/components/brand";
@@ -28,7 +29,20 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           passwordLogin={passwordLoginEnabled}
           initialError={params.error ? t("authError") : null}
         />
-        <p className="mt-8 text-center text-xs leading-relaxed text-muted-foreground">{t("terms")}</p>
+        <p className="mt-8 text-center text-xs leading-relaxed text-muted-foreground">
+          {t.rich("terms", {
+            terms: (chunks) => (
+              <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
       </div>
     </main>
   );

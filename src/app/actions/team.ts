@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
+import { configuredLocale, defaultLocale } from "@/i18n/config";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { sendEmail, emailBrand } from "@/lib/email";
 import { siteUrl } from "@/lib/config";
@@ -62,7 +63,7 @@ export async function setMemberStatus(
       admin.from("profiles").select("locale").eq("id", userId).single(),
     ]);
     if (user?.user?.email) {
-      const t = await getTranslations({ locale: profile?.locale ?? "en", namespace: "email" });
+      const t = await getTranslations({ locale: profile?.locale ?? configuredLocale() ?? defaultLocale, namespace: "email" });
       await sendEmail({
         to: user.user.email,
         subject: t("memberApprovedSubject", { municipality: ctx.municipality.name }),
