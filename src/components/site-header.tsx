@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Brand } from "@/components/brand";
 import { UserMenu } from "@/components/user-menu";
-import { getCurrentUser, getMunicipality } from "@/lib/data";
+import { findMunicipality, getCurrentUser } from "@/lib/data";
 import { singleMunicipality } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { MunicipalityLogo } from "@/components/municipality-logo";
@@ -15,7 +15,7 @@ type Props = {
 };
 
 export async function SiteHeader({ municipality: municipalityProp, isStaff, next, className }: Props) {
-  const municipality = municipalityProp ?? (singleMunicipality ? await getMunicipality(singleMunicipality) : null);
+  const municipality = municipalityProp ?? (singleMunicipality ? await findMunicipality(singleMunicipality) : null);
   const user = await getCurrentUser();
   const t = await getTranslations("common");
   return (

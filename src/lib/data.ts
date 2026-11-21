@@ -23,10 +23,16 @@ export async function requireUser(next: string) {
   return user;
 }
 
-export const getMunicipality = cache(async (slug: string) => {
-  if (singleMunicipality && slug !== singleMunicipality) notFound();
+/** Returns null instead of a 404 when the municipality does not exist or is not visible. */
+export const findMunicipality = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data } = await supabase.from("municipalities").select(MUNICIPALITY_COLUMNS).eq("slug", slug).maybeSingle();
+  return data;
+});
+
+export const getMunicipality = cache(async (slug: string) => {
+  if (singleMunicipality && slug !== singleMunicipality) notFound();
+  const data = await findMunicipality(slug);
   if (!data) notFound();
   return data;
 });
