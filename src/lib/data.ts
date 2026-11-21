@@ -81,6 +81,18 @@ export async function getReports(municipalityId: string, limit = 2000): Promise<
   return reports;
 }
 
+/** A single list item, for linking to a report that falls outside the capped `getReports` result. */
+export async function getReportListItem(municipalityId: string, reportId: string): Promise<ReportListItem | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("reports")
+    .select(REPORT_LIST_COLUMNS)
+    .eq("municipality_id", municipalityId)
+    .eq("id", reportId)
+    .maybeSingle();
+  return data;
+}
+
 export const getMembership = cache(async (municipalityId: string) => {
   const user = await getCurrentUser();
   if (!user) return null;
