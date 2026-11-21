@@ -22,6 +22,7 @@ const connectSources = [
   "https://nominatim.openstreetmap.org",
   // A custom style can load tiles, sprites and glyphs from any host.
   process.env.NEXT_PUBLIC_MAP_STYLE_URL ? "https:" : "",
+  origin(process.env.NEXT_PUBLIC_MAP_STYLE_URL),
   origin(process.env.NEXT_PUBLIC_SATELLITE_TILES_URL),
   "https://vercel.live",
   "wss://ws-us3.pusher.com",
