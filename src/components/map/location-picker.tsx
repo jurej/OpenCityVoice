@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { maplibregl } from "./maplibre";
 import { type Map as MapLibreMap } from "maplibre-gl";
 import { useTranslations } from "next-intl";
-import { MapStyleControl, boundaryPaint, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
+import { MapStyleControl, boundaryPaint, isMapStyleId, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
 
 type Props = {
   /** Initial and externally controlled position as [lat, lng]. */
@@ -12,11 +12,12 @@ type Props = {
   zoom?: number;
   boundary?: GeoJSON.Geometry | null;
   onChange: (value: [number, number]) => void;
+  defaultStyle?: string;
   className?: string;
 };
 
 /** Map with a fixed pin in the center: the user pans the map to place the pin. */
-export function LocationPicker({ value, zoom = 17, boundary, onChange, className }: Props) {
+export function LocationPicker({ value, zoom = 17, boundary, onChange, defaultStyle, className }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onChangeRef = useRef(onChange);
@@ -29,7 +30,7 @@ export function LocationPicker({ value, zoom = 17, boundary, onChange, className
 
   useEffect(() => {
     if (!container.current) return;
-    let styleId: MapStyleId = storedMapStyle();
+    let styleId: MapStyleId = storedMapStyle(isMapStyleId(defaultStyle) ? defaultStyle : "map");
     const map = new maplibregl.Map({
       container: container.current,
       style: mapStyle(styleId),

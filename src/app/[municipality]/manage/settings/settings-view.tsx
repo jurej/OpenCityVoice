@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { NativeSelect } from "@/components/ui/native-select";
+import { isMapStyleId, mapStyleIds } from "@/components/map/map-styles";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CategoryIcon, categoryIcons } from "@/components/category-icon";
 import { StatusBadge } from "@/components/report-bits";
@@ -111,6 +112,7 @@ function LogoForm({ municipality }: { municipality: PublicMunicipality }) {
 function MunicipalityForm({ municipality, hasBoundary }: { municipality: PublicMunicipality; hasBoundary: boolean }) {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
+  const tm = useTranslations("map");
   const { pending, run } = useAction();
   const fileInput = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
@@ -121,6 +123,7 @@ function MunicipalityForm({ municipality, hasBoundary }: { municipality: PublicM
     center_lat: municipality.center_lat,
     center_lng: municipality.center_lng,
     default_zoom: municipality.default_zoom,
+    default_map_style: isMapStyleId(municipality.default_map_style) ? municipality.default_map_style : ("map" as const),
   });
 
   async function upload(file: File | undefined) {
@@ -170,6 +173,20 @@ function MunicipalityForm({ municipality, hasBoundary }: { municipality: PublicM
             <Input type="number" step="0.0001" value={form.center_lng} onChange={(e) => setForm({ ...form, center_lng: Number(e.target.value) })} aria-label="Longitude" />
             <Input type="number" step="0.5" min={3} max={19} value={form.default_zoom} onChange={(e) => setForm({ ...form, default_zoom: Number(e.target.value) })} aria-label="Zoom" />
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="m-map-style">{t("defaultMapStyle")}</Label>
+          <NativeSelect
+            id="m-map-style"
+            value={form.default_map_style}
+            onChange={(e) => setForm({ ...form, default_map_style: e.target.value as typeof form.default_map_style })}
+          >
+            {mapStyleIds.map((id) => (
+              <option key={id} value={id}>
+                {tm(id)}
+              </option>
+            ))}
+          </NativeSelect>
         </div>
         <div className="sm:col-span-2">
           <Button type="submit" disabled={pending}>{tc("save")}</Button>

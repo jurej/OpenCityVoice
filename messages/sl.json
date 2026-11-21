@@ -305,7 +305,8 @@
     "uploadLogo": "Naloži logotip",
     "replaceLogo": "Zamenjaj",
     "removeLogo": "Odstrani",
-    "logoTooLarge": "Logotip mora biti manjši od 1 MB."
+    "logoTooLarge": "Logotip mora biti manjši od 1 MB.",
+    "defaultMapStyle": "Privzeti prikaz zemljevida"
   },
   "admin": {
     "title": "Administracija platforme",

@@ -58,15 +58,20 @@ export function boundaryPaint(id: MapStyleId) {
       };
 }
 
-export function storedMapStyle(): MapStyleId {
-  if (typeof window === "undefined") return "map";
+export function isMapStyleId(value: unknown): value is MapStyleId {
+  return (mapStyleIds as readonly unknown[]).includes(value);
+}
+
+/** The visitor's saved choice, or `fallback` (the municipality's default) when there is none. */
+export function storedMapStyle(fallback: MapStyleId = "map"): MapStyleId {
+  if (typeof window === "undefined") return fallback;
   let value: string | null = null;
   try {
     value = window.localStorage.getItem(STORAGE_KEY);
   } catch {
     // Storage can be blocked by browser settings.
   }
-  return (mapStyleIds as readonly string[]).includes(value ?? "") ? (value as MapStyleId) : "map";
+  return isMapStyleId(value) ? value : fallback;
 }
 
 const layersIcon =

@@ -173,6 +173,7 @@ export default async function ReportPage({ params }: Params) {
                   center={[report.lat, report.lng]}
                   zoom={16}
                   interactive={false}
+                  defaultStyle={municipality.default_map_style}
                   pins={[{ id: report.id, lat: report.lat, lng: report.lng, color: category.color }]}
                 />
               </Link>

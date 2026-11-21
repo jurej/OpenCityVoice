@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { maplibregl } from "./maplibre";
 import type { GeoJSONSource, MapLayerMouseEvent, MapMouseEvent, Map as MapLibreMap } from "maplibre-gl";
 import { useTranslations } from "next-intl";
-import { MapStyleControl, boundaryPaint, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
+import { MapStyleControl, boundaryPaint, isMapStyleId, mapStyle, storedMapStyle, type MapStyleId } from "./map-styles";
 
 export type MapPin = { id: string; lat: number; lng: number; color: string; closed?: boolean };
 
@@ -16,6 +16,7 @@ type Props = {
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
   interactive?: boolean;
+  defaultStyle?: string;
   className?: string;
 };
 
@@ -31,7 +32,7 @@ function toFeatureCollection(pins: MapPin[]): GeoJSON.FeatureCollection<GeoJSON.
   };
 }
 
-export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, interactive = true, className }: Props) {
+export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, interactive = true, defaultStyle, className }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const loaded = useRef(false);
@@ -48,7 +49,8 @@ export function ReportMap({ center, zoom, pins, boundary, selectedId, onSelect, 
 
   useEffect(() => {
     if (!container.current) return;
-    let styleId: MapStyleId = interactive ? storedMapStyle() : "map";
+    const fallback = isMapStyleId(defaultStyle) ? defaultStyle : "map";
+    let styleId: MapStyleId = interactive ? storedMapStyle(fallback) : fallback;
     const map = new maplibregl.Map({
       container: container.current,
       style: mapStyle(styleId),

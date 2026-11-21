@@ -223,6 +223,7 @@ export function Dashboard(props: Props) {
             className="absolute inset-0"
             center={[municipality.center_lat, municipality.center_lng]}
             zoom={municipality.default_zoom}
+            defaultStyle={municipality.default_map_style}
             pins={pins}
             boundary={boundary}
             selectedId={selectedId}

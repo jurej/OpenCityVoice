@@ -156,6 +156,7 @@ export type Database = {
           center_lng: number;
           contact_email: string | null;
           created_at: string;
+          default_map_style: string;
           default_zoom: number;
           id: string;
           is_active: boolean;
@@ -174,6 +175,7 @@ export type Database = {
           center_lng: number;
           contact_email?: string | null;
           created_at?: string;
+          default_map_style?: string;
           default_zoom?: number;
           id?: string;
           is_active?: boolean;
@@ -191,6 +193,7 @@ export type Database = {
           center_lng?: number;
           contact_email?: string | null;
           created_at?: string;
+          default_map_style?: string;
           default_zoom?: number;
           id?: string;
           is_active?: boolean;
@@ -682,6 +685,7 @@ export type Database = {
           center_lng: number;
           contact_email: string | null;
           created_at: string;
+          default_map_style: string;
           default_zoom: number;
           id: string;
           is_active: boolean;

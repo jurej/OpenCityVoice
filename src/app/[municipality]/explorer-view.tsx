@@ -144,6 +144,7 @@ export function ExplorerView({ municipality, categories, statuses, reports, boun
           className="absolute inset-0 [&_.maplibregl-ctrl-bottom-right]:mb-[72px] md:[&_.maplibregl-ctrl-bottom-right]:mb-0"
           center={initialReport ? [initialReport.lat, initialReport.lng] : [municipality.center_lat, municipality.center_lng]}
           zoom={initialReport ? Math.max(municipality.default_zoom, 16) : municipality.default_zoom}
+          defaultStyle={municipality.default_map_style}
           pins={pins}
           boundary={boundary}
           selectedId={selectedId}
