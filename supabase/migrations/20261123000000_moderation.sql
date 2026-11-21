@@ -10,13 +10,44 @@ drop policy "Reports are public" on public.reports;
 create policy "Visible reports are public" on public.reports for select
   using (not is_hidden or author_id = (select auth.uid()) or public.is_municipality_staff(municipality_id));
 
+-- Comments and events follow their report: the subquery only finds reports the caller may see.
 drop policy "Comments are public" on public.report_comments;
 create policy "Visible comments are public" on public.report_comments for select
   using (
-    not is_hidden
-    or author_id = (select auth.uid())
-    or public.is_municipality_staff((select municipality_id from public.reports where id = report_id))
+    exists (select 1 from public.reports r where r.id = report_id)
+    and (
+      not is_hidden
+      or author_id = (select auth.uid())
+      or public.is_municipality_staff((select municipality_id from public.reports where id = report_id))
+    )
   );
+
+drop policy "Events are public" on public.report_events;
+create policy "Events of visible reports are public" on public.report_events for select
+  using (exists (select 1 from public.reports r where r.id = report_id));
+
+-- Forward links stop working while a report is hidden.
+create or replace function public.get_forwarded_report(p_token uuid)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'forward', jsonb_build_object('message', f.message, 'created_at', f.created_at, 'expires_at', f.expires_at),
+    'report', to_jsonb(r) - 'location',
+    'municipality', jsonb_build_object('name', m.name, 'slug', m.slug, 'primary_color', m.primary_color),
+    'category', jsonb_build_object('name', c.name, 'color', c.color),
+    'status', jsonb_build_object('name', s.name, 'color', s.color)
+  )
+    from public.report_forwards f
+    join public.reports r on r.id = f.report_id
+    join public.municipalities m on m.id = r.municipality_id
+    join public.categories c on c.id = r.category_id
+    join public.statuses s on s.id = r.status_id
+   where f.token = p_token and f.expires_at > now() and not r.is_hidden;
+$$;
 
 create function public.set_comment_hidden(p_comment_id uuid, p_hidden boolean)
 returns void
