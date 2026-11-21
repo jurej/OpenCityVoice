@@ -28,7 +28,7 @@ export async function flagContent(input: z.input<typeof flagSchema>): Promise<Re
     .insert({ report_id: reportId, comment_id: commentId, reporter_id: userId, reason: reason || null });
   // A repeated flag from the same user is not an error.
   if (error && error.code !== "23505") return { ok: false };
-  if (!error) after(() => notifyModeratorsOfFlag(reportId, commentId, reason));
+  if (!error) after(() => notifyModeratorsOfFlag(reportId, commentId, userId, reason));
   return { ok: true };
 }
 

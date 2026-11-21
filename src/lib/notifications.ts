@@ -126,15 +126,23 @@ export async function notifyAssigneeOfComment(reportId: string, commenterId: str
 }
 
 /** E-mails municipality admins when content is flagged, once per piece of content until it is resolved. */
-export async function notifyModeratorsOfFlag(reportId: string, commentId: string | null, reason: string) {
+export async function notifyModeratorsOfFlag(
+  reportId: string,
+  commentId: string | null,
+  reporterId: string,
+  reason: string,
+) {
   const admin = createAdminClient();
   const openFlags = admin
     .from("content_flags")
-    .select("id", { count: "exact", head: true })
+    .select("reporter_id")
     .eq("report_id", reportId)
-    .is("resolved_at", null);
-  const [{ count }, { data: report }, { data: comment }] = await Promise.all([
-    commentId ? openFlags.eq("comment_id", commentId) : openFlags.is("comment_id", null),
+    .is("resolved_at", null)
+    .order("created_at")
+    .order("id")
+    .limit(1);
+  const [{ data: firstFlag }, { data: report }, { data: comment }] = await Promise.all([
+    (commentId ? openFlags.eq("comment_id", commentId) : openFlags.is("comment_id", null)).maybeSingle(),
     admin
       .from("reports")
       .select("id, number, title, description, municipality_id, municipalities(slug, name, primary_color, logo_path)")
@@ -144,7 +152,8 @@ export async function notifyModeratorsOfFlag(reportId: string, commentId: string
       ? admin.from("report_comments").select("body").eq("id", commentId).single()
       : Promise.resolve({ data: null }),
   ]);
-  if ((count ?? 0) > 1 || !report?.municipalities) return;
+  // Only the first open flag on an item alerts moderators, even when several arrive at once.
+  if (firstFlag?.reporter_id !== reporterId || !report?.municipalities) return;
   const { data: members } = await admin
     .from("municipality_members")
     .select("user_id")
